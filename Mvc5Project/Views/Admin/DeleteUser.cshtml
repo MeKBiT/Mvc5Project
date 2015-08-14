@@ -1,0 +1,25 @@
+﻿@{
+    ViewBag.Title = "DeleteUser";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>DeleteUser</h2>
+
+@using (Html.BeginForm("DeleteUser", "Admin", FormMethod.Post, new { @role = "form" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        <div>Are you sure you want to <i>Delete User</i>?</div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Delete User" class="btn btn-default" />
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="button" value="Cancel" onclick="location.href='@Url.Action("EditUser", "Admin")'" class="btn btn-default" style="float:left;" />
+        </div>
+    </div>
+}

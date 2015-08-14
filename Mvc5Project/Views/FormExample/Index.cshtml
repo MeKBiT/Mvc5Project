@@ -1,0 +1,54 @@
+﻿@using Mvc5Project.Controllers
+
+@{
+    ViewBag.Title = "Tables";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Style
+{
+    <style type="text/css">
+        .userTestForm th, .userTestForm td {
+            min-width: 150px;
+            min-height: 50px;
+            text-align: center;
+            border: solid;
+        }
+    </style>
+}
+<h2>@ViewBag.Title</h2>
+<hr />
+
+@Html.ActionLink("Create New", "Create")
+<hr />
+<table class="userTestForm">
+    <tr>
+        <th>FirstName</th>
+        <th>LastName</th>
+        <th>Email</th>
+        <th>Gender</th>
+        <th>Country</th>
+        <th>Courses</th>
+        <th>Description</th>
+        <th>Edit</th>
+    </tr>
+    @foreach (var usr in FormExampleController.usrList)
+    {
+        <tr>
+            <td>@usr.FirstName</td>
+            <td>@usr.LastName</td>
+            <td>@usr.Email</td>
+            <td>@usr.Gender</td>
+            <td>@usr.Country</td>
+            <td>
+                @foreach (var item in usr.Courses)
+                {
+                    @item.Name;<br />
+                }
+            </td>
+            <td>@usr.Description</td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { @id = @usr.UserID })
+            </td>
+        </tr>
+    }
+</table>

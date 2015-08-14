@@ -1,0 +1,74 @@
+﻿@model Mvc5Project.Models.FormCreateViewModel
+@using Mvc5Project.Controllers
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewBag.Title</h2>
+<hr />
+@using (Html.BeginForm("Create", "FormExample", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.FirstName, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.LastName, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.LastName, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Gender, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.RadioButtonFor(m => m.Gender, "Male", new { @id = "male" })
+            @Html.Label("male", "Male")
+            @Html.RadioButtonFor(m => m.Gender, "Female", new { @id = "female" })
+            @Html.Label("female", "Female")
+        </div>
+    </div>
+    {
+        ViewBag.Country = AccountController.GetCountries();
+    }
+    <div class="form-group">
+        @Html.LabelFor(m => m.Country, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.DropDownListFor(m => m.Country, (IEnumerable<SelectListItem>)ViewBag.Country, "Select Country", new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Courses, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @for (int i = 0; i < FormExampleController.courses.Count(); i++)
+            {
+                @Html.CheckBoxFor(m => m.Courses[i].Checked)
+                @Html.LabelFor(m => m.Courses[i].Checked, Model.Courses[i].Name)
+                @Html.HiddenFor(m => m.Courses[i].ID)<br />
+            }
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Description, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.TextAreaFor(m => m.Description, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" class="btn btn-default" value="Create" />
+        </div>
+    </div>
+
+}
+

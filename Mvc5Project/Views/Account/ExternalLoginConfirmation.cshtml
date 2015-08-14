@@ -1,0 +1,220 @@
+﻿@model Mvc5Project.Models.ExternalLoginConfirmationViewModel
+@using Mvc5Project.Controllers
+@{
+    ViewBag.Title = "Register";
+}
+<h2>@ViewBag.Title.</h2>
+<h3>Associate your @ViewBag.LoginProvider account.</h3>
+
+@using (Html.BeginForm("ExternalLoginConfirmation", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+
+    <h4>Association Form</h4>
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <p class="text-info">
+        You've successfully authenticated with <strong>@ViewBag.LoginProvider</strong>.
+        Please fill out the form below and click the Register button to finish
+        logging in.
+    </p>
+
+
+    {
+        if (AccountController.OFname != null)
+        {
+            ViewBag.OFname = AccountController.OFname;
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.ExtFirstName, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.ExtFirstName, new
+               {
+                   @class = "form-control",
+                   @Value = @ViewBag.OFname,
+                   @readonly = "readonly",
+                   @style = "text-transform: capitalize"
+               })
+                    @Html.ValidationMessageFor(m => m.ExtFirstName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="form-group">
+                @Html.LabelFor(m => m.ExtFirstName, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.ExtFirstName, new
+               {
+                   @class = "form-control",
+                   @style = "text-transform: capitalize"
+               })
+                    @Html.ValidationMessageFor(m => m.ExtFirstName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        }
+    }
+
+
+
+    {
+        if (AccountController.OLname != null)
+        {
+            ViewBag.OLname = AccountController.OLname;
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.ExtLastName, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.ExtLastName, new
+               {
+                   @class = "form-control",
+                   @Value = @ViewBag.OLname,
+                   @readonly = "readonly",
+                   @style = "text-transform: capitalize"
+               })
+                    @Html.ValidationMessageFor(m => m.ExtLastName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="form-group">
+                @Html.LabelFor(m => m.ExtLastName, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.ExtLastName, new
+               {
+                   @class = "form-control",
+                   @style = "text-transform: capitalize"
+               })
+                    @Html.ValidationMessageFor(m => m.ExtLastName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        }
+    }
+
+
+
+    {
+        if (AccountController.OFname != null &&
+                    AccountController.OLname != null)
+        {
+            ViewBag.Username = AccountController.OFname.Substring(0, 1).ToLower() + AccountController.OLname.ToLower();
+            <div class="form-group">
+                @Html.LabelFor(m => m.ExtUsername, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.ExtUsername, new
+               {
+                   @class = "form-control",
+                   @Value = @ViewBag.Username,
+               })            @Html.ValidationMessageFor(m => m.ExtUsername, "", new { @class = "text-danger" })
+        </div>
+    </div>
+        }
+        else
+        {
+            <div class="form-group">
+                @Html.LabelFor(m => m.ExtUsername, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.ExtUsername, new { @class = "form-control" })            @Html.ValidationMessageFor(m => m.ExtUsername, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        }
+    }
+
+
+
+
+    {
+        if (AccountController.OEmail != null &&
+            AccountController.FindEmail(AccountController.OEmail) == null)
+        {
+            ViewBag.OEmail = AccountController.OEmail;
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.Email, new
+               {
+                   @class = "form-control",
+                   @Value = @ViewBag.OEmail,
+                   @readonly = "readonly"
+               })            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+        </div>
+    </div>
+        }
+        else
+        {
+            <div class="form-group">
+                @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.Email, new
+               {
+                   @class = "form-control"
+               })
+                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        }
+    }
+
+
+    {
+        if (AccountController.OBirthday != null)
+        {
+            ViewBag.OBirthday = AccountController.OBirthday;
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.ExtBirthDate, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.ExtBirthDate, new
+               {
+                   @class = "form-control",
+                   @Value = @ViewBag.OBirthday,
+                   @readonly = "readonly",
+                   @type = "date"
+               })
+                    @Html.ValidationMessageFor(m => m.ExtBirthDate, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="form-group">
+                @Html.LabelFor(m => m.ExtBirthDate, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.ExtBirthDate, new
+               {
+                   @class = "form-control",
+                   @type = "date"
+               })
+                    @Html.ValidationMessageFor(m => m.ExtBirthDate, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        }
+    }
+
+    {
+        ViewBag.ExtCountry = AccountController.GetCountries();
+    }
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.ExtCountry, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.DropDownListFor(model => model.ExtCountry, (IEnumerable<SelectListItem>)ViewBag.ExtCountry, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.ExtCountry, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" class="btn btn-default" value="Register" />
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+

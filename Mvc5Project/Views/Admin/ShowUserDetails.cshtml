@@ -1,0 +1,98 @@
+﻿@model PagedList.IPagedList<Mvc5Project.Models.AdminUserViewModel>
+@using PagedList.Mvc;
+@using Mvc5Project.Controllers
+@using System.Globalization
+<link href="~/Content/PagedList.css" rel="stylesheet" />
+
+<table class="userDetails">
+    @{
+        var totalUsers = AdminController.usrList.ToList().Count();
+        int num = (Model.PageNumber - 1) * 4;
+    }
+
+    <tr>
+        <td colspan="4" style="border-top:none;border-bottom:none;">
+            <link href="~/Content/PagedList.css" rel="stylesheet" />
+            @using (Html.BeginForm("Index", "Admin", FormMethod.Get))
+            {
+                <label>UserName: </label>
+                if (AdminController.AdmNameSrch != null)
+                {
+                    @Html.TextBox("searchString", @AdminController.AdmNameSrch)
+                }
+                else
+                {
+                    @Html.TextBox("searchString")
+                }
+                <input type="submit" value="Search" />
+            }
+        </td>
+    </tr>
+    <tr>
+        <td colspan="4" style="border-top:none;">
+            @{
+                var roles = AdminController.roleList;
+            }
+            @using (Html.BeginForm("Index", "Admin", FormMethod.Get))
+            {
+                if (AdminController.AdmRankSrch != null)
+                {
+                    foreach (var item in roles)
+                    {
+                        if (item.Value == AdminController.AdmRankSrch)
+                        {
+                            item.Selected = true;
+                            break;
+                        }
+                    }
+                    ViewBag.RoleList = roles;
+                    @Html.DropDownList("searchRank", (IEnumerable<SelectListItem>)ViewBag.RoleList, new { @class = "mnginp", onchange = "this.form.submit()" })
+                }
+                else
+                {
+                    ViewBag.RoleList = roles;
+                    @Html.DropDownList("searchRank", (IEnumerable<SelectListItem>)ViewBag.RoleList, new { @class = "mnginp", onchange = "this.form.submit()" })
+                }
+
+            }
+
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="4" style="border-top:none;">Total Users : @totalUsers</td>
+    </tr>
+    <tr>
+        <th class="tblnum"></th>
+        <th>@Html.ActionLink("Username", "Index", new { sortOrder = ViewBag.UsernameSortParm })</th>
+        <th>@Html.ActionLink("Rank", "Index", new { sortOrder = ViewBag.RankSortParm })</th>
+        <th>Edit</th>
+    </tr>
+
+    @foreach (var usr in Model)
+    {
+        ViewBag.UserName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(usr.UserName);
+        ViewBag.UserFullName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(usr.UserFullName);
+        num++;
+
+        <tr>
+            <td class="tblnum">@num</td>
+            <td title="@ViewBag.UserFullName">@ViewBag.UserName</td>
+            <td>@usr.RankName</td>
+            <td>
+                @using (Html.BeginForm("EditUser", "Admin", FormMethod.Post, new { @role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@usr.UserId" />
+                    <input type="submit" class="btn-default btn" value="~" />
+                }
+
+            </td>
+        </tr>
+    }
+</table>
+<br />
+<div class="pagenum">
+    Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+</div>
+@Html.PagedListPager(Model, page => Url.Action("Index", new { page, sortOrder = ViewBag.CurrentSort }))

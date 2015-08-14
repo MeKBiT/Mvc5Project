@@ -1,0 +1,53 @@
+﻿@model Mvc5Project.Models.AdminEditViewModel
+@using Mvc5Project.Controllers
+@{
+    ViewBag.Title = "EditUser";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="mnghmcont">
+    <div class="mnghmsub">
+        @using (Html.BeginForm("SaveUser", "Admin", FormMethod.Post, new { role = "form" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.UserName, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", @readonly = "readonly", Value = @AdminController.AdmUsrName })
+                </div>
+            </div>
+            {
+                var admCtrl = new AdminController();
+                ViewBag.Roles = admCtrl.GetUserRoles(AdminController.AdmUsrRole);
+            }
+            <div class="form-group">
+                @Html.LabelFor(m => m.RankName, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.DropDownListFor(m => m.RankName, (IEnumerable<SelectListItem>)ViewBag.Roles, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
+                <div class="col-md-10">
+                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control", @readonly = "readonly", Value = @AdminController.AdmUsrEmail })
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Save" class="btn btn-default" />
+                </div>
+            </div>
+        }
+        @using (Html.BeginForm("DeleteUser", "Admin", FormMethod.Get, new { role = "form" }))
+        {
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    @Html.TextBoxFor(model => model.RankName, new { @class = "form-control", @type = "hidden", Value = @AdminController.AdmUsrRole })
+                    @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", @type = "hidden", @readonly = "readonly", Value = @AdminController.AdmUsrName })
+                    <input type="submit" value="Delete User" class="btn btn-default" />
+                </div>
+            </div>
+        }
+    </div>
+</div>
