@@ -22,3 +22,169 @@ select,
 textarea {
     max-width: 280px;
 }
+
+/*#region Blog*/
+.blogContainer {
+    overflow: hidden;
+}
+
+.mainblogview {
+    width: 70%;
+    min-height: 500px;
+    float: left;
+    position: relative;
+}
+
+    .mainblogview hr {
+        width: 95%;
+        margin: 0 auto;
+    }
+
+.mainblogbar {
+    width: 29%;
+    min-height: 500px;
+    float: right;
+}
+
+    .mainblogbar .blogControlPanel {
+        background-color: rgba(255, 255, 255, 0.50);
+        border: solid #750000 0.5px;
+        -moz-box-shadow: 0 1px 4px #999;
+        -webkit-box-shadow: 0 1px 4px #999;
+        box-shadow: 0 1px 4px #999;
+        width: 99%;
+        margin-bottom: 5px;
+        overflow: hidden;
+    }
+
+        .mainblogbar .blogControlPanel .blogCtrlTable {
+            width: 100%;
+            margin-top: 5px;
+        }
+
+            .mainblogbar .blogControlPanel .blogCtrlTable td {
+                padding: 1px 5px;
+            }
+
+            .mainblogbar .blogControlPanel .blogCtrlTable .blgCtrlPnl {
+                text-decoration: none;
+                color: blue;
+                font-size: 14px;
+            }
+
+    .mainblogbar .adminBlogCtrl {
+        background-color: rgba(255, 255, 255, 0.50);
+        border: solid #750000 0.5px;
+        -moz-box-shadow: 0 1px 4px #999;
+        -webkit-box-shadow: 0 1px 4px #999;
+        box-shadow: 0 1px 4px #999;
+        width: 99%;
+        margin-bottom: 5px;
+        overflow: hidden;
+    }
+
+        .mainblogbar .adminBlogCtrl table {
+            margin: 10px;
+        }
+
+            .mainblogbar .adminBlogCtrl table td a {
+                text-decoration: none;
+                color: blue;
+            }
+
+/*#endregion Blog*/
+
+/*#region Posts*/
+
+.postDescContainer {
+    border: solid 0.5px;
+    background-color: rgba(255, 255, 255, 0.50);
+    border-radius: 10px;
+    width: 95%;
+    margin: 10px auto;
+    padding: 10px;
+    overflow: hidden;
+}
+
+    .postDescContainer a {
+        text-decoration: none;
+        color: blue;
+        width: 80%;
+    }
+
+    .postDescContainer .postDescTitle {
+        width: 80%;
+    }
+
+        .postDescContainer .postDescTitle h3 {
+            margin: 5px 0;
+        }
+
+    .postDescContainer .postPubDate {
+        font-style: italic;
+        color: #5f80ff;
+        margin: 5px 0;
+        float: right;
+    }
+
+    .postDescContainer .postDescCategory {
+        display: inline-block;
+        margin: 5px 0;
+    }
+
+        .postDescContainer .postDescCategory .postDescCatNames {
+            float: left;
+        }
+
+        .postDescContainer .postDescCategory label {
+            float: left;
+            font-style: italic;
+            font-weight: bold;
+        }
+
+    .postDescContainer .postDescBody {
+        margin-bottom: 5px;
+    }
+
+    .postDescContainer .postVidCont {
+        float: right;
+        width: 200px;
+    }
+
+    .postDescContainer .postVidThumb {
+        width: 200px;
+        height: 100px;
+    }
+    .postDescContainer .postVidThumb img{
+        margin-bottom: 5px;
+    }
+.postLikes {
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.postDislikes {
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.mainblogview .paging {
+    position: absolute;
+    bottom: 0;
+}
+
+.mainblogview #spacer {
+    width: 100%;
+    height: 100px;
+    float: left;
+    display: inline-block;
+}
+
+.mainblogview .pagination-container {
+    margin-left: 20px;
+}
+
+.mainblogview .pagenum {
+    margin-left: 20px;
+}
+/*#endregion Posts*/

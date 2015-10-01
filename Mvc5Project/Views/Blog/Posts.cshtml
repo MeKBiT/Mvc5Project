@@ -1,0 +1,165 @@
+﻿@model PagedList.IPagedList<Mvc5Project.Models.BlogViewModel>
+@using PagedList.Mvc;
+@using Mvc5Project.Controllers
+<link href="~/Content/css/PagedList.css" rel="stylesheet" />
+
+
+@{
+    BlogController blogCtrl = new BlogController();
+    int postnum = 0;
+}
+
+<div style="overflow:hidden;width:100%;">
+    <table style="float:right;">
+        <tr>
+            <th>Sort by :</th>
+            <th>
+                @using (Html.BeginForm("Index", "Blog", FormMethod.Get))
+            {
+                if (ViewBag.CurrentSearchCategory != null)
+                {
+                    foreach (var item in ViewBag.CurrentSearchCategory)
+                    {
+                            <input type="hidden" name="searchCategory" value="@item" />
+                        }
+                    }
+                    if (ViewBag.CurrentSearchTag != null)
+                    {
+                        foreach (var item in ViewBag.CurrentSearchTag)
+                        {
+                            <input type="hidden" name="searchTag" value="@item" />
+                        }
+                    }
+                    <input type="hidden" name="searchString" value="@ViewBag.CurrentSearchString" />
+                    <input type="hidden" name="sortOrder" value="@ViewBag.DateSortParm" />
+                    <input class="submitBtnLink" type="submit" value="Date" />
+                }
+            </th>
+            <th class="tableTitle">
+                @using (Html.BeginForm("Index", "Blog", FormMethod.Get))
+            {
+                if (ViewBag.CurrentSearchCategory != null)
+                {
+                    foreach (var item in ViewBag.CurrentSearchCategory)
+                    {
+                            <input type="hidden" name="searchCategory" value="@item" />
+                        }
+                    }
+                    if (ViewBag.CurrentSearchTag != null)
+                    {
+                        foreach (var item in ViewBag.CurrentSearchTag)
+                        {
+                            <input type="hidden" name="searchTag" value="@item" />
+                        }
+                    }
+                    <input type="hidden" name="searchString" value="@ViewBag.CurrentSearchString" />
+                    <input type="hidden" name="sortOrder" value="@ViewBag.TitleSortParm" />
+                    <input class="submitBtnLink" type="submit" value="Title" />
+                }
+            </th>
+        </tr>
+    </table>
+</div>
+
+
+
+@foreach (var post in Model)
+{
+    postnum++;
+    var total = post.PostLikes - post.PostDislikes;
+    <div class="postDescContainer">
+
+        <div class="postPubDate">
+            <div>@post.PostedOn.ToShortDateString()</div>
+        </div>
+        <a href="#">
+            <div class="postDescTitle"><h3>@Html.ActionLink(@post.Title, "Post", "Blog", new { slug = @post.UrlSlug }, null)</h3></div>
+        </a>
+        <div class="postDescCategory">
+            <label>Category:&nbsp;</label>
+            @{
+                var postCats = blogCtrl.GetPostCategories(post.Post);
+                int postcatnum = 0;
+                foreach (var cat in postCats)
+                {
+                    postcatnum++;
+                    <a href="#">
+                        <div class="postDescCatNames">
+                            @cat.Name@if (postcatnum < postCats.Count())
+                            {
+                                @Html.Raw(",&nbsp;")
+                            }
+                        </div>
+                    </a>
+                }
+            }
+        </div>
+        <div class="postDescBody">
+            @{
+                var postVideos = blogCtrl.GetPostVideos(post.Post);
+                if (postVideos != null)
+                {
+                    <div class="postVidCont">
+                        @foreach (var video in postVideos)
+                        {
+                            <a href="@video.VideoUrl" class="postVidThumb" target="_blank"><img src="@Url.Content(video.VideoThumbnail)" width="200" height="100" /></a>
+                        }
+                    </div>
+                }
+            }
+            @Html.Raw(post.ShortDescription)
+            @Html.ActionLink("Read More...", "Post", "Blog", new { slug = @post.UrlSlug }, null)
+        </div>
+        @if (total >= 0)
+        {
+            <table class="postLikes">
+                <tr>
+                    <td style="text-align:center; color:green; font-style:italic;">@total</td>
+                    <td><img src="@Url.Content("~/Content/images/post/like.png")" width="20" height="20" alt="upvote" /></td>
+                </tr>
+            </table>
+        }
+        else
+        {
+            <table class="postDislikes">
+                <tr>
+                    <td style="text-align:center; color:#b50000; font-style:oblique;">@total</td>
+                    <td><img src="@Url.Content("~/Content/images/post/dislike.png")" width="20" height="20" alt="downvote" /></td>
+                </tr>
+            </table>
+        }
+    </div>
+                }
+
+<div id="spacer"></div>
+<div class="paging">
+    <div class="pagenum">
+        Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+    </div>
+    @{
+        List<string> searchCatList = new List<string>();
+        List<string> searchTagList = new List<string>();
+        if (ViewBag.CurrentSearchCategory != null)
+        {
+            foreach (var item in ViewBag.CurrentSearchCategory)
+            {
+                searchCatList.Add(item);
+            }
+        }
+        if (ViewBag.CurrentSearchTag != null)
+        {
+            foreach (var item in ViewBag.CurrentSearchTag)
+            {
+                searchTagList.Add(item);
+            }
+        }
+    }
+    @if (ViewBag.CurrentSearchCategory != null || ViewBag.CurrentSearchTag != null)
+    {
+        @Html.PagedListPager(Model, page => Url.Action("Index", "Blog", new { page, sortOrder = ViewBag.CurrentSort, searchString = ViewBag.SearchString }) + "?" + string.Join("&", searchCatList.Select(x => "searchCategory=" + x)) + "&" + string.Join("&", searchTagList.Select(x => "searchTag=" + x)))
+    }
+    else
+    {
+        @Html.PagedListPager(Model, page => Url.Action("Index", "Blog", new { page, sortOrder = ViewBag.CurrentSort, searchString = ViewBag.SearchString }))
+    }
+</div>

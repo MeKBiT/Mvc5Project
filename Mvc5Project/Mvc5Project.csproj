@@ -182,9 +182,12 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AdminController.cs" />
+    <Compile Include="Controllers\BlogController.cs" />
     <Compile Include="Controllers\FormExampleController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="DAL\BlogRepository.cs" />
+    <Compile Include="DAL\IBlogRepository.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -193,6 +196,11 @@
       <DependentUpon>201508120455490_User.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\ApplicationDbContext\Configuration.cs" />
+    <Compile Include="Migrations\BlogDbContext\201510010321304_Blog.cs" />
+    <Compile Include="Migrations\BlogDbContext\201510010321304_Blog.Designer.cs">
+      <DependentUpon>201510010321304_Blog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\BlogDbContext\Configuration.cs" />
     <Compile Include="Migrations\FormExampleDbContext\201508130509364_Form.cs" />
     <Compile Include="Migrations\FormExampleDbContext\201508130509364_Form.Designer.cs">
       <DependentUpon>201508130509364_Form.cs</DependentUpon>
@@ -200,6 +208,7 @@
     <Compile Include="Migrations\FormExampleDbContext\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\AdminViewModels.cs" />
+    <Compile Include="Models\BlogViewModels.cs" />
     <Compile Include="Models\FormExampleViews.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
@@ -212,6 +221,17 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\images\post\add.png" />
+    <Content Include="Content\images\post\comment.png" />
+    <Content Include="Content\images\post\delete.png" />
+    <Content Include="Content\images\post\dislike.png" />
+    <Content Include="Content\images\post\downvote.png" />
+    <Content Include="Content\images\post\edit.png" />
+    <Content Include="Content\images\post\like.png" />
+    <Content Include="Content\images\post\remove.png" />
+    <Content Include="Content\images\post\report.png" />
+    <Content Include="Content\images\post\upvote.png" />
+    <Content Include="Content\images\profile\devsone.png" />
     <Content Include="Content\PagedList.css" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
@@ -289,6 +309,8 @@
     <Content Include="Views\FormExample\Index.cshtml" />
     <Content Include="Views\FormExample\Create.cshtml" />
     <Content Include="Views\FormExample\Edit.cshtml" />
+    <Content Include="Views\Blog\Index.cshtml" />
+    <Content Include="Views\Blog\Posts.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -300,6 +322,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\ApplicationDbContext\201508120455490_User.resx">
       <DependentUpon>201508120455490_User.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\BlogDbContext\201510010321304_Blog.resx">
+      <DependentUpon>201510010321304_Blog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\FormExampleDbContext\201508130509364_Form.resx">
       <DependentUpon>201508130509364_Form.cs</DependentUpon>
