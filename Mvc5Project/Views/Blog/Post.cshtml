@@ -1,0 +1,67 @@
+﻿@model Mvc5Project.Models.PostViewModel
+@using Mvc5Project.Controllers
+@using Microsoft.AspNet.Identity
+@{
+    ViewBag.Title = Model.Title;
+    if (Model.PostTags != null)
+    {
+        ViewBag.Keywords = string.Join(" ", Model.PostTags.Select(t => t.Name).ToArray());
+    }
+    ViewBag.Description = Model.Meta;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Scripts
+{
+    <script src="~/ckeditor/ckeditor.js"></script>
+}
+
+
+
+
+<div id="postScroll">
+    <div class="postContainer">
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="postMenu">
+                <div class="postMenuSub">
+                    <a href="@Url.Action("EditPost","Blog",new {slug = Model.UrlSeo })" title="Edit"><img src="@Url.Content("~/Content/images/post/edit.png")" width="25" height="25" alt="edit" /></a>
+                    <a href="@Url.Action("DeletePost","Blog",new {postid = Model.ID })" title="Delete"><img src="@Url.Content("~/Content/images/post/delete.png")" width="25" height="25" alt="delete" /></a>
+                </div>
+            </div>
+        }
+        <div class=" postHeader">
+            @if (Model.ID != Model.FirstPostId)
+            {
+                @Html.ActionLink("<< Previous", "Post", "Blog", new { slug = Model.PreviousPostSlug, sortorder = ViewBag.CurrentSort }, new { style = "float:left;" })
+            }
+            @if (Model.ID != Model.LastPostId)
+            {
+                @Html.ActionLink("Next >>", "Post", "Blog", new { slug = Model.NextPostSlug, sortorder = ViewBag.CurrentSort }, new { style = "float:right;" })
+            }
+
+        </div>
+        <div class="postTitle"><h2>@Model.Title</h2></div>
+        <div class="addthis_sharing_toolbox"></div>
+        <div class="postVote" id="postVote">
+            <table>
+                <tr><td style="text-align:center; color:green; font-style:italic;">@Model.PostLikes</td></tr>
+                <tr><td><a href="@Url.Action("UpdatePostLike", "Blog", new { slug=Model.UrlSeo, postid = Model.ID,username = User.Identity.GetUserName(), likeordislike = "like",sortorder = ViewBag.CurrentSort })"><img src="@Url.Content("~/Content/images/post/upvote.png")" width="30" height="30" alt="upvote" /></a></td></tr>
+                <tr><td><a href="@Url.Action("UpdatePostLike", "Blog", new { slug=Model.UrlSeo, postid = Model.ID,username = User.Identity.GetUserName(), likeordislike = "dislike" ,sortorder = ViewBag.CurrentSort})"><img src="@Url.Content("~/Content/images/post/downvote.png")" width="30" height="30" alt="downvote" /></a></td></tr>
+                <tr><td style="text-align:center; color:#b50000; font-style:oblique;">@Model.PostDislikes</td></tr>
+            </table>
+        </div>
+        @if (Model.Videos != null)
+        {
+            foreach (var video in Model.Videos)
+            {
+                <div class="postVideo">
+                    <iframe width="560" height="315" src="@video.VideoUrl" frameborder="0" allowfullscreen></iframe>
+                </div>
+            }
+        }
+        @{
+            BlogController blgCtrl = new BlogController();
+        }
+        <div class="postBody">@Html.Raw(Model.Body)</div>
+    </div>
+</div>

@@ -26,6 +26,7 @@ textarea {
 /*#region Blog*/
 .blogContainer {
     overflow: hidden;
+    margin-top:50px;
 }
 
 .mainblogview {
@@ -100,7 +101,7 @@ textarea {
     border: solid 0.5px;
     background-color: rgba(255, 255, 255, 0.50);
     border-radius: 10px;
-    width: 95%;
+    width: 100%;
     margin: 10px auto;
     padding: 10px;
     overflow: hidden;
@@ -188,3 +189,607 @@ textarea {
     margin-left: 20px;
 }
 /*#endregion Posts*/
+
+/*#region Allposts*/
+.postsTable {
+    background-color: rgba(255, 255, 255, 0.50);
+    -moz-box-shadow: 0 1px 4px #999;
+    -webkit-box-shadow: 0 1px 4px #999;
+    box-shadow: 0 1px 4px #999;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .postsTable a {
+        text-decoration: none;
+        color: blue;
+    }
+
+    .postsTable th {
+        border: solid #750000 0.5px;
+        text-align: center;
+        padding: 5px;
+    }
+
+    .postsTable td {
+        padding: 5px;
+        border: solid #750000 0.5px;
+    }
+
+    .postsTable .tableTitle {
+        width: 200px;
+    }
+
+.submitBtnLink {
+    border: none;
+    cursor: pointer;
+    color: blue;
+    font-weight: bold;
+    background: none;
+    font-size: 16px;
+}
+
+.postsSearch {
+    width: 100%;
+    margin: 50px 0 10px 0;
+    overflow: hidden;
+}
+
+    .postsSearch .allPostsForm {
+        float: right;
+    }
+
+.postsFilter {
+    float: left;
+    max-width: 700px;
+}
+
+    .postsFilter table th {
+        text-align: left;
+        display: table-cell;
+        vertical-align: text-top;
+    }
+
+    .postsFilter .postsFltInp {
+        width: 100px;
+        float: left;
+    }
+
+    .postsFilter .postFiltBtn {
+        font-size: 18px;
+        border: 1.5px groove;
+        border-top: none;
+        border-left: none;
+        border-radius: 5px;
+        float: right;
+        background-color: rgba(255, 255, 255, 0.58);
+        margin-top: 10px;
+    }
+
+/*#endregion Allposts*/
+
+
+/*#region Post*/
+.postContainer {
+    background-color: rgba(255, 255, 255, 0.70);
+    border-radius: 10px;
+    width: 95%;
+    margin: 0 auto;
+    padding: 10px;
+    overflow: hidden;
+}
+
+    .postContainer .postHeader {
+        overflow: hidden;
+    }
+
+    .postContainer a {
+        text-decoration: none;
+        color: blue;
+    }
+
+    .postContainer .postTitle {
+        text-align: center;
+    }
+
+    .postContainer .postVote {
+        float: left;
+        margin-left: -10px;
+        overflow: hidden;
+        background: linear-gradient(lightgreen,#ff6d6d);
+        border-radius: 0 10px 10px 0;
+        min-width: 50px;
+    }
+
+        .postContainer .postVote table {
+            margin: 0 auto;
+        }
+
+    .postContainer .postShare {
+        float: right;
+        margin-right: -10px;
+        border-radius: 10px 0 0 10px;
+        background: linear-gradient(#bdbdff,#a4a4fc);
+        width: 40px;
+    }
+
+        .postContainer .postShare table {
+            margin: 0 auto;
+        }
+
+    .postContainer .postVideo {
+        width: 560px;
+        margin: 0 auto;
+    }
+
+    .postContainer .postBody {
+        width: 90%;
+        margin: 10px auto;
+        position: relative;
+        padding: 10px;
+        -ms-word-wrap: break-word;
+        word-wrap: break-word;
+    }
+
+        .postContainer .postBody pre, .commentBody pre {
+            padding: 10px;
+            border-radius: 10px;
+            background-color: #750000;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+.bottomContainer {
+    width: 95%;
+    margin: 0 auto;
+    margin-top: 50px;
+    padding: 10px;
+    overflow: hidden;
+}
+
+.commentContainer {
+    width: 70%;
+    min-width: 520px;
+    overflow: hidden;
+}
+
+    .commentContainer .commHeader {
+        width: 98%;
+        padding: 5px;
+        color: #5353f6;
+    }
+
+        .commentContainer .commHeader .commentSort {
+            float: right;
+        }
+
+            .commentContainer .commHeader .commentSort td {
+                padding-left: 15px;
+            }
+
+                .commentContainer .commHeader .commentSort td a {
+                    text-decoration: none;
+                    color: blue;
+                }
+
+                .commentContainer .commHeader .commentSort td #active {
+                    color: rgba(0, 49, 116, 0.57);
+                }
+
+
+.collapseComment {
+    display: none;
+}
+
+blockquote {
+    padding: 0 5px;
+    background-color: rgba(255, 255, 0, 0.33);
+}
+
+.newComment {
+    width: 93%;
+    margin: 0 auto;
+    margin-bottom: 5px;
+    overflow: hidden;
+}
+
+    .newComment .comImg {
+        float: left;
+        margin-right: 5px;
+    }
+
+    .newComment .comTextdiv {
+        width: 98%;
+        min-height: 40px;
+        max-height: 350px;
+        border: 1.5px groove;
+        border-bottom: none;
+        border-right: none;
+        border-radius: 10px;
+        background-color: rgba(255, 255, 255, 0.58);
+        overflow: auto;
+        overflow-x: hidden;
+        padding: 5px;
+        line-height: 10px;
+        font-size: 18px;
+    }
+
+    .newComment .comTextarea {
+        width: 98%;
+        min-height: 100px;
+        border: 1.5px groove;
+        border-bottom: none;
+        border-right: none;
+        border-radius: 10px;
+        background-color: rgba(255, 255, 255, 0.58);
+        overflow: auto;
+        overflow-x: hidden;
+        padding: 15px;
+        font-size: 14px;
+    }
+
+    .newComment .comTextBtn {
+        font-size: 24px;
+        border: 1.5px groove;
+        border-top: none;
+        border-left: none;
+        border-radius: 5px;
+        float: right;
+        background-color: rgba(255, 255, 255, 0.58);
+        margin-top: 10px;
+    }
+
+[contentEditable=true]:empty:not(:focus):before {
+    line-height: 40px;
+    color: #aaa4a4;
+    content: attr(data-ph);
+}
+
+.commentContainer .userImage {
+    height: 50px;
+    float: left;
+    margin-right: 10px;
+}
+
+.commentContainer .userComment {
+    width: 90%;
+    padding: 10px;
+    margin: 0 auto;
+    margin-bottom: 5px;
+    border: 1.5px groove;
+    border-bottom: none;
+    border-right: none;
+    border-radius: 10px;
+}
+
+    .commentContainer .userComment .commentControl {
+        float: right;
+    }
+
+        .commentContainer .userComment .commentControl a {
+            text-decoration: none;
+            color: blue;
+            cursor: pointer;
+        }
+
+    .commentContainer .userComment .parentReply {
+        width: 95%;
+        padding: 10px 0 0 20px;
+        margin-bottom: 5px;
+    }
+
+        .commentContainer .userComment .parentReply .childReply {
+            padding: 10px 0 0 30px;
+            margin-bottom: 5px;
+        }
+
+.commentContainer .commentUserName {
+    color: blue;
+}
+
+    .commentContainer .commentUserName .cmntTime {
+        color: gray;
+        font-size: smaller;
+    }
+
+.commentContainer .commentDate {
+    color: #5f80ff;
+    font-style: italic;
+}
+
+.commentContainer .commentBody {
+    margin-top: 25px;
+    -ms-word-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.replySubMenu {
+    margin-bottom: 10px;
+    overflow: hidden;
+    width: 100%;
+    height: 25px;
+    padding: 5px;
+}
+
+    .replySubMenu a {
+        text-decoration: none;
+        font-style: italic;
+        color: #7575fb;
+        line-height: 25px;
+        margin: 0 5px;
+        float: left;
+    }
+
+    .replySubMenu img {
+        width: 20px;
+        height: 20px;
+    }
+
+    .replySubMenu .shareParent {
+        overflow: hidden;
+        display: inline-block;
+        position: relative;
+    }
+
+.postMenu {
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+    .postMenu .postMenuSub {
+        width: 55px;
+        float: right;
+    }
+
+.commentMenu {
+    width: 60px;
+    float: right;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+/*#endregion Post*/
+
+/*#region EditPost*/
+.editPostContainer {
+    background-color: rgba(255, 255, 255, 0.70);
+    border-radius: 10px;
+    width: 95%;
+    margin: 0 auto;
+    padding: 10px;
+    overflow: hidden;
+}
+
+    .editPostContainer .editPostId {
+        width: 100%;
+        overflow: hidden;
+        float: left;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+
+        .editPostContainer .editPostId .editPostIdLbl {
+            float: left;
+            margin-right: 10px;
+        }
+
+        .editPostContainer .editPostId .editPostIdInp {
+            width: 50px;
+            display: block;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+    .editPostContainer .editPostTitle {
+        width: 100%;
+    }
+
+        .editPostContainer .editPostTitle .editPostTitleLbl {
+            text-align: center;
+            float: left;
+        }
+
+        .editPostContainer .editPostTitle .editPostTitleInp {
+            width: 100%;
+            display: block;
+            height: 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+    .editPostContainer .editPostVideo {
+        overflow: hidden;
+        width: 100%;
+    }
+
+        .editPostContainer .editPostVideo .editPostVidCont {
+            border: groove 2px;
+            border-bottom: none;
+            border-right: none;
+            background-color: white;
+            border-radius: 10px;
+            height: 30px;
+            text-align: center;
+            float: left;
+            margin-top: 5px;
+            margin-right: 10px;
+        }
+
+        .editPostContainer .editPostVideo .editPostVideoInp {
+            margin: 5px 10px 0 5px;
+            border-radius: 10px;
+            height: 25px;
+        }
+
+    .editPostContainer .editPostCategories {
+        overflow: hidden;
+        width: 100%;
+    }
+
+        .editPostContainer .editPostCategories .editPostCatInp {
+            border: groove 2px;
+            border-bottom: none;
+            border-right: none;
+            background-color: white;
+            border-radius: 10px;
+            height: 30px;
+            text-align: center;
+            float: left;
+            margin-top: 5px;
+            margin-right: 10px;
+        }
+
+            .editPostContainer .editPostCategories .editPostCatInp .catName {
+                float: left;
+                margin: 5px;
+            }
+
+    .editPostContainer .editPostTags {
+        overflow: hidden;
+        width: 100%;
+    }
+
+        .editPostContainer .editPostTags .editPostTagInp {
+            border: groove 2px;
+            border-bottom: none;
+            border-right: none;
+            background-color: white;
+            border-radius: 10px;
+            height: 30px;
+            text-align: center;
+            float: left;
+            margin-top: 5px;
+            margin-right: 10px;
+        }
+
+            .editPostContainer .editPostTags .editPostTagInp .tagName {
+                float: left;
+                margin: 5px;
+            }
+
+    .editPostContainer .editPostMeta, .editPostContainer .editPostSeo {
+        width: 50%;
+        border-radius: 10px;
+        height: 25px;
+        text-align: center;
+        margin-bottom: 5px;
+    }
+
+    .editPostContainer .editPostDesc {
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .editPostContainer .editPostBody {
+        overflow: hidden;
+        width: 100%;
+    }
+
+        .editPostContainer .editPostBody .comTextBtn {
+            font-size: 24px;
+            border: 1.5px groove;
+            border-top: none;
+            border-left: none;
+            border-radius: 5px;
+            float: right;
+            background-color: rgba(255, 255, 255, 0.58);
+        }
+
+.addVidCont {
+    width: 50%;
+    margin: 0 auto;
+}
+
+    .addVidCont .addVidToPost {
+        border-radius: 10px;
+        height: 25px;
+        text-align: center;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .addVidCont .addVidBtn {
+        font-size: 24px;
+        border: 1.5px groove;
+        border-top: none;
+        border-left: none;
+        border-radius: 5px;
+        float: right;
+        background-color: rgba(255, 255, 255, 0.58);
+    }
+
+.addCatCont, .newCatCont {
+    margin: 0 auto;
+}
+
+    .addCatCont .addCatInp, .newCatCont .newCatInp {
+        min-width: 200px;
+        border: groove 2px;
+        border-bottom: none;
+        border-right: none;
+        background-color: white;
+        border-radius: 10px;
+        height: 25px;
+        text-align: center;
+        float: left;
+        margin-top: 5px;
+        margin-right: 10px;
+    }
+
+    .addCatCont .addCatBtn, .newCatCont .newCatBtn {
+        font-size: 18px;
+        border: 1.5px groove;
+        border-top: none;
+        border-left: none;
+        border-radius: 5px;
+        float: right;
+        background-color: rgba(255, 255, 255, 0.58);
+        margin-top: 10px;
+    }
+/*#endregion EditPost*/
+
+/*#region IndexFilter*/
+
+.indexFiltBtn {
+    font-size: 14px;
+    color: blue;
+    border: 1.5px groove;
+    border-top: none;
+    border-left: none;
+    border-radius: 5px;
+    float: right;
+    background-color: rgba(255, 255, 255, 0.58);
+    margin: 10px;
+}
+
+.indexSearchForm {
+    margin: 10px;
+}
+
+/*#endregion IndexFilter*/
+
+/*#region catsAndTags*/
+
+.catsAndTags{
+    margin:0 auto;
+    border-collapse:separate;
+    border-spacing:50px 0;
+}
+.catsAndTags th{
+    padding-bottom:10px;
+}
+.catsAndTags a{
+    text-decoration:none;
+    color:blue;
+}
+.catsAndTags td{
+    display:table-cell;
+    vertical-align:text-top;
+    padding-bottom:10px;
+}
+/*#endregion catsAndTags*/
+
+.addthis_sharing_toolbox{
+        margin:10px auto;
+        width: 360px;
+    }

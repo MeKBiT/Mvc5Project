@@ -1,0 +1,16 @@
+﻿@model Mvc5Project.Models.PostViewModel
+@{
+    ViewBag.Title = "Add Video";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("AddVideoToPost", "Blog", FormMethod.Post, new { role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="addVidCont">
+        <input type="hidden" name="slug" value="@Model.UrlSeo" />
+        <input type="hidden" name="postid" value="@Model.ID" />
+        <input class="addVidToPost" type="url" name="videoUrl" />
+        <input class="addVidBtn" type="submit" value="&#x27a5;" />
+    </div>
+}

@@ -1,0 +1,45 @@
+﻿@using Mvc5Project.Controllers
+@{
+    ViewBag.Title = "Categories And Tags";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var categories = BlogController.checkCatList;
+    var tags = BlogController.checkTagList;
+}
+
+@using (Html.BeginForm("RemoveCatAndTag", "Blog", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    <table class="catsAndTags">
+        <tr>
+            <th>Categories</th>
+            <th>Tags</th>
+        </tr>
+        <tr>
+            <td><a href="@Url.Action("AddNewCategory", "Blog", new { callfrompost = false })" class="addremoveBtn" title="Add Category"><img src="@Url.Content("~/Content/images/post/add.png")" width="25" height="25" alt="add" style="float:left;" /><div style="float:left;margin-left:5px;">New Category</div></a></td>
+            <td><a href="@Url.Action("AddNewTag", "Blog", new { callfrompost = false })" class="addremoveBtn" title="Add Tag"><img src="@Url.Content("~/Content/images/post/add.png")" width="25" height="25" alt="add" style="float:left;" /><div style="float:left;margin-left:5px;">New Tag</div></a></td>
+        </tr>
+        <tr>
+            <td>
+                @foreach (var cat in categories)
+                {
+                    <div>
+                        <input type="checkbox" name="categoryNames" value="@cat.Category.Name" /> @cat.Category.Name
+                    </div>
+                }
+            </td>
+            <td>
+                @foreach (var tag in tags)
+                {
+                    <div>
+                        <input type="checkbox" name="tagNames" value="@tag.Tag.Name" /> @tag.Tag.Name
+                    </div>
+                }
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input class="indexFiltBtn" type="submit" value="Remove" />
+            </td>
+        </tr>
+    </table>
+}

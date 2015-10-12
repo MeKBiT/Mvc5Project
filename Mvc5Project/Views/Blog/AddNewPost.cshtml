@@ -1,0 +1,53 @@
+﻿@model Mvc5Project.Models.PostViewModel
+
+@{
+    ViewBag.Title = "Add New Post";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("AddNewPost", "Blog", FormMethod.Post, new { role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="editPostContainer">
+        <table>
+            <tr>
+                <td>Id :</td>
+                <td colspan="2" class="editPostId">@Html.TextBoxFor(m => m.ID, new { @class = "editPostIdInp", @readonly = "readonly" })</td>
+            </tr>
+            <tr>
+                <td>Title :</td>
+                <td colspan="2" class="editPostTitle">@Html.TextBoxFor(m => m.Title, new { @class = "editPostTitleInp" })</td>
+            </tr>
+            <tr>
+                <td>Meta :</td>
+                <td colspan="2">@Html.TextBoxFor(m => m.Meta, new { @class = "editPostMeta" })</td>
+            </tr>
+            <tr>
+                <td>UrlSeo :</td>
+                <td colspan="2">@Html.TextBoxFor(m => m.UrlSeo, new { @class = "editPostSeo" })</td>
+            </tr>
+            <tr>
+                <td>ShortDescription :</td>
+                <td colspan="2" class="editPostDesc">
+                    @Html.TextAreaFor(m => m.ShortDescription, new { @id = "editor1", Value = Model.ShortDescription })
+                    <script>
+                        CKEDITOR.replace('editor1');
+                    </script>
+                </td>
+            </tr>
+            <tr>
+                <td>Body :</td>
+                <td colspan="2" class="editPostBody">
+                    @Html.TextAreaFor(m => m.Body, new { @id = "editor2", Value = Model.Body })
+                    <script>
+                        CKEDITOR.replace('editor2');
+                    </script>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="3" class="editPostBody"><input class="comTextBtn" type="submit" value="&#x27a5;" /></td>
+            </tr>
+        </table>
+    </div>
+}

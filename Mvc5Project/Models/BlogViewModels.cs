@@ -202,4 +202,31 @@ namespace Mvc5Project.Models
         public Tag Tag { get; set; }
         public string UrlSlug { get; set; }
     }
+
+    public class PostViewModel
+    {
+        public string Body { get; set; }
+        public string FirstPostId { get; set; }
+        public string ID { get; set; }
+        public string LastPostId { get; set; }
+        public string NextPostSlug { get; set; }
+        public int PostCount { get; set; }
+        public int PostDislikes { get; set; }
+        public int PostLikes { get; set; }
+        public string PreviousPostSlug { get; set; }
+        public string Title { get; set; }
+        public IList<PostVideo> Videos { get; set; }
+        public IList<Tag> PostTags { get; set; }
+        public string Meta { get; set; }
+        public string UrlSeo { get; set; }
+        public IList<Category> PostCategories { get; set; }
+        public string ShortDescription { get; set; }
+        public IList<Category> Categories { get; set; }
+        public IList<Tag> Tags { get; set; }
+
+
+
+    }
+
+
 }

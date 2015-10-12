@@ -1,0 +1,204 @@
+﻿@model PagedList.IPagedList<Mvc5Project.Models.AllPostsViewModel>
+@using Mvc5Project.Controllers
+@using PagedList.Mvc;
+<link href="~/Content/css/PagedList.css" rel="stylesheet" />
+
+@{
+    ViewBag.Title = "AllPosts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var categories = BlogController.checkCatList;
+    var tags = BlogController.checkTagList;
+    var num = 0;
+
+}
+
+<div class="postsSearch">
+    <div style="color:blue;cursor:pointer;float:left;width:700px;" id="postsFilterBtn">Filter</div>
+    <div class="postsFilter">
+        @using (Html.BeginForm("AllPosts", "Blog", FormMethod.Get))
+            {
+            <table>
+                <tr>
+                    <th>Categories :</th>
+                    <td>
+                        @foreach (var cat in categories)
+                        {
+                            <div class="postsFltInp">
+                                @if (cat.Checked)
+                                {
+                                    <input type="checkbox" name="searchCategory" value="@cat.Category.Name" checked="checked" /> @cat.Category.Name
+                                }
+                                else
+                                {
+                                    <input type="checkbox" name="searchCategory" value="@cat.Category.Name" /> @cat.Category.Name
+                                }
+                            </div>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <th>Tags :</th>
+                    <td>
+                        @foreach (var tag in tags)
+                        {
+                            <div class="postsFltInp">
+                                @if (tag.Checked)
+                                {
+                                    <input type="checkbox" name="searchTag" value="@tag.Tag.Name" checked="checked" /> @tag.Tag.Name
+                                }
+                                else
+                                {
+                                    <input type="checkbox" name="searchTag" value="@tag.Tag.Name" /> @tag.Tag.Name
+                                }
+                            </div>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="hidden" name="sortOrder" value="@ViewBag.CurrentSort" />
+                        <input type="hidden" name="searchString" value="@ViewBag.CurrentSearchString" />
+                        <input class="postFiltBtn" type="submit" value="&#x27a5;" />
+                    </td>
+                </tr>
+            </table>
+        }
+    </div>
+    @using (Html.BeginForm("AllPosts", "Blog", FormMethod.Get, new { @class = "allPostsForm" }))
+    {
+        if (ViewBag.CurrentSearchCategory != null)
+        {
+            foreach (var item in ViewBag.CurrentSearchCategory)
+            {
+                <input type="hidden" name="searchCategory" value="@item" />
+            }
+        }
+        if (ViewBag.CurrentSearchTag != null)
+        {
+            foreach (var item in ViewBag.CurrentSearchTag)
+            {
+                <input type="hidden" name="searchTag" value="@item" />
+            }
+        }
+        <input type="hidden" name="sortOrder" value="@ViewBag.CurrentSort" />
+        <input type="search" name="searchString" value="@ViewBag.CurrentSearchString" placeholder="Search..." />
+    }
+</div>
+
+<table class="postsTable">
+    <tr>
+        <th>#</th>
+        <th>
+            @using (Html.BeginForm("AllPosts", "Blog", FormMethod.Get))
+            {
+                if (ViewBag.CurrentSearchCategory != null)
+                {
+                    foreach (var item in ViewBag.CurrentSearchCategory)
+                    {
+                        <input type="hidden" name="searchCategory" value="@item" />
+                    }
+                }
+                if (ViewBag.CurrentSearchTag != null)
+                {
+                    foreach (var item in ViewBag.CurrentSearchTag)
+                    {
+                        <input type="hidden" name="searchTag" value="@item" />
+                    }
+                }
+                <input type="hidden" name="searchString" value="@ViewBag.CurrentSearchString" />
+                <input type="hidden" name="sortOrder" value="@ViewBag.DateSortParm" />
+                <input class="submitBtnLink" type="submit" value="Date" />
+            }
+        </th>
+        <th class="tableTitle">
+            @using (Html.BeginForm("AllPosts", "Blog", FormMethod.Get))
+            {
+                if (ViewBag.CurrentSearchCategory != null)
+                {
+                    foreach (var item in ViewBag.CurrentSearchCategory)
+                    {
+                        <input type="hidden" name="searchCategory" value="@item" />
+                    }
+                }
+                if (ViewBag.CurrentSearchTag != null)
+                {
+                    foreach (var item in ViewBag.CurrentSearchTag)
+                    {
+                        <input type="hidden" name="searchTag" value="@item" />
+                    }
+                }
+                <input type="hidden" name="searchString" value="@ViewBag.CurrentSearchString" />
+                <input type="hidden" name="sortOrder" value="@ViewBag.TitleSortParm" />
+                <input class="submitBtnLink" type="submit" value="Title" />
+            }
+        </th>
+        <th>Description</th>
+        <th>Categories</th>
+        <th>Tags</th>
+        @if (User.IsInRole("Admin"))
+            {
+            <th>Edit</th>
+            <th>Delete</th>
+        }
+    </tr>
+    @foreach (var post in Model)
+    {
+        num++;
+        <tr>
+            <td>@num</td>
+            <td>@post.Date.ToShortDateString()</td>
+            <td><a href="@Url.Action("Post","Blog",new {slug = @post.UrlSlug })" title="Title">@post.Title</a></td>
+            <td>@Html.Raw(post.Description)</td>
+            <td>
+                @foreach (var cat in post.PostCategories)
+                {
+                    <div>&#9679;@cat.Name</div>
+                }
+            </td>
+            <td>
+                @foreach (var tag in post.PostTags)
+                {
+                    <div>&#9679;@tag.Name</div>
+                }
+            </td>
+            @if (User.IsInRole("Admin"))
+                {
+                <td><a href="@Url.Action("EditPost","Blog",new {slug = post.UrlSlug })" title="Edit">Edit</a></td>
+                <td><a href="@Url.Action("DeletePost","Blog",new {postid = post.PostId })" title="Delete">Delete</a></td>
+            }
+        </tr>
+    }
+</table>
+
+<div id="spacer"></div>
+<div class="paging">
+    <div class="pagenum">
+        Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+    </div>
+    @{
+        List<string> searchCatList = new List<string>();
+        List<string> searchTagList = new List<string>();
+        if (ViewBag.CurrentSearchCategory != null)
+        {
+            foreach (var item in ViewBag.CurrentSearchCategory)
+            {
+                searchCatList.Add(item);
+            }
+        }
+        if (ViewBag.CurrentSearchTag != null)
+        {
+            foreach (var item in ViewBag.CurrentSearchTag)
+            {
+                searchTagList.Add(item);
+            }
+        }
+    }
+    @if (ViewBag.CurrentSearchCategory != null || ViewBag.CurrentSearchTag != null)
+    {
+        @Html.PagedListPager(Model, page => Url.Action("AllPosts", "Blog", new { page, sortOrder = ViewBag.CurrentSort, searchString = ViewBag.SearchString }) + "&" + string.Join("&", searchCatList.Select(x => "searchCategory=" + x)) + "&" + string.Join("&", searchTagList.Select(x => "searchTag=" + x)))
+    }
+    else
+    {
+        @Html.PagedListPager(Model, page => Url.Action("AllPosts", "Blog", new { page, sortOrder = ViewBag.CurrentSort, searchString = ViewBag.SearchString }))
+    }
+</div>

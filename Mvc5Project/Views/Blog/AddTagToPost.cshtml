@@ -1,0 +1,47 @@
+﻿@model Mvc5Project.Models.PostViewModel
+@using Mvc5Project.Models
+
+@{
+    ViewBag.Title = "AddTagToPost";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("AddTagToPost", "Blog", FormMethod.Post, new { @class = "addCatForm", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <table class="addCatCont">
+        <tr>
+            <td><a href="@Url.Action("AddNewTag", "Blog", new { postid = Model.ID, callfrompost=true})" class="addremoveBtn" title="Add Tag"><img src="@Url.Content("~/Content/images/post/add.png")" width="25" height="25" alt="add" /></a></td>
+            <td><= Add New Tag</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                @for (int i = 0; i < Model.Tags.Count(); i++)
+                {
+                    BlogDbContext db = new BlogDbContext();
+                    string tagId = Model.Tags[i].Id;
+                    bool check = db.PostTags.Where(x => x.TagId == tagId && x.PostId == Model.ID).Select(x => x.Checked).FirstOrDefault();
+                    if (check)
+                    {
+                        Model.Tags[i].Checked = true;
+                        @Html.CheckBoxFor(m => m.Tags[i].Checked)
+                    }
+                    else
+                    {
+                        @Html.CheckBoxFor(m => m.Tags[i].Checked)
+                    }
+
+                    @Html.LabelFor(m => m.Tags[i].Checked, Model.Tags[i].Name)
+                    @Html.HiddenFor(m => m.Tags[i].Id)<br />
+                }
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                @Html.TextBoxFor(m => m.ID, new { type = "hidden" })
+                <input class="addCatBtn" type="submit" value="&#x27a5;" />
+            </td>
+        </tr>
+    </table>
+}
