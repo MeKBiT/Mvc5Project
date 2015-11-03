@@ -7,7 +7,7 @@ namespace Mvc5Project.Migrations.BlogDbContext
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = true;
+            AutomaticMigrationsEnabled = false;
             MigrationsDirectory = @"Migrations\BlogDbContext";
         }
 
@@ -32,6 +32,24 @@ namespace Mvc5Project.Migrations.BlogDbContext
             context.PostVideos.AddOrUpdate(new Models.PostVideo { Id = 2, PostId = "2", VideoSiteName = "YouTube", VideoUrl = "https://www.youtube.com/embed/HcSEU_BZwDw", VideoThumbnail = "http://img.youtube.com/vi/HcSEU_BZwDw/0.jpg" });
             context.PostVideos.AddOrUpdate(new Models.PostVideo { Id = 3, PostId = "3", VideoSiteName = "YouTube", VideoUrl = "https://www.youtube.com/embed/HcSEU_BZwDw", VideoThumbnail = "http://img.youtube.com/vi/HcSEU_BZwDw/0.jpg" });
             context.PostVideos.AddOrUpdate(new Models.PostVideo { Id = 4, PostId = "1", VideoSiteName = "YouTube", VideoUrl = "https://www.youtube.com/embed/XzAHGhMhl7o", VideoThumbnail = "http://img.youtube.com/vi/XzAHGhMhl7o/0.jpg" });
+
+
+            context.Comments.AddOrUpdate(new Models.Comment { Id = "cmt1", PostId = "1", Body = "Vivamus hendrerit commodo pulvinar. In convallis nunc nec scelerisque sodales. Curabitur aliquam neque dolor, hendrerit cursus felis ultricies ac. Mauris ac justo vel lorem condimentum malesuada. Vivamus porttitor vestibulum lorem a luctus. Suspendisse in eleifend orci.", DateTime = DateTime.Now, UserName = "devsone" });
+            context.Comments.AddOrUpdate(new Models.Comment { Id = "cmt2", PostId = "1", Body = "Suspendisse egestas risus eget posuere egestas. Nunc facilisis ligula et vestibulum pretium. Suspendisse potenti. Nulla facilisi. Integer mi lorem, efficitur quis viverra in, sollicitudin id urna. Maecenas scelerisque, tellus eget rutrum pulvinar, velit erat pulvinar risus, vitae convallis quam mi ut leo. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut posuere lacus ex, eget tristique quam eleifend molestie.", DateTime = DateTime.Now, UserName = "mario" });
+            context.Comments.AddOrUpdate(new Models.Comment { Id = "cmt3", PostId = "1", Body = "Integer lacinia ipsum magna, ac sodales libero porttitor at. Donec at enim felis. Ut bibendum lorem odio, quis ultricies elit eleifend ut. Fusce erat tellus, eleifend at gravida in, fermentum et tellus. Fusce at massa vehicula, maximus diam nec, lacinia lectus.", DateTime = DateTime.Now, UserName = "natash" });
+
+
+            context.Replies.AddOrUpdate(new Models.Reply { Id = "rep1", PostId = "1", CommentId = "cmt3", DateTime = DateTime.Now, UserName = "flint", Body = "Cras sodales justo sit amet libero placerat consectetur. Duis hendrerit facilisis tempor. Nullam ut nisl nec neque posuere semper. Praesent vestibulum id purus quis maximus." });
+            context.Replies.AddOrUpdate(new Models.Reply { Id = "rep9", PostId = "1", CommentId = "cmt3", DateTime = DateTime.Now, UserName = "anyav", Body = "Cras sodales justo sit amet libero placerat consectetur. Duis hendrerit facilisis tempor. Nullam ut nisl nec neque posuere semper. Praesent vestibulum id purus quis maximus." });
+            context.Replies.AddOrUpdate(new Models.Reply { Id = "rep2", PostId = "1", CommentId = "cmt3", ParentReplyId = "rep1", DateTime = DateTime.Now, UserName = "devsone", Body = "Mauris pulvinar tristique libero id ornare. Quisque sit amet accumsan leo. Vestibulum dapibus elit sed lorem lacinia suscipit. In hac habitasse platea dictumst. Vivamus egestas leo eu nulla faucibus cursus." });
+            context.Replies.AddOrUpdate(new Models.Reply { Id = "rep3", PostId = "1", CommentId = "cmt3", ParentReplyId = "rep2", DateTime = DateTime.Now, UserName = "kingkong", Body = "Suspendisse consequat dolor urna, sit amet accumsan lectus luctus eget. Vestibulum maximus ante vel placerat cursus. Nulla luctus augue ac vulputate aliquet." });
+            context.Replies.AddOrUpdate(new Models.Reply { Id = "rep4", PostId = "1", CommentId = "cmt3", ParentReplyId = "rep3", DateTime = DateTime.Now, UserName = "hanley", Body = "Donec aliquam, sem a tincidunt tincidunt, orci velit mollis magna, vel auctor arcu augue nec risus. Integer luctus enim ac viverra luctus." });
+
+            context.Replies.AddOrUpdate(new Models.Reply { Id = "rep5", PostId = "1", CommentId = "cmt2", DateTime = DateTime.Now, UserName = "taylor", Body = "Cras sodales justo sit amet libero placerat consectetur. Duis hendrerit facilisis tempor. Nullam ut nisl nec neque posuere semper. Praesent vestibulum id purus quis maximus." });
+            context.Replies.AddOrUpdate(new Models.Reply { Id = "rep6", PostId = "1", CommentId = "cmt2", ParentReplyId = "rep5", DateTime = DateTime.Now, UserName = "devsone", Body = "Mauris pulvinar tristique libero id ornare. Quisque sit amet accumsan leo. Vestibulum dapibus elit sed lorem lacinia suscipit." });
+            context.Replies.AddOrUpdate(new Models.Reply { Id = "rep7", PostId = "1", CommentId = "cmt2", ParentReplyId = "rep6", DateTime = DateTime.Now, UserName = "hanley", Body = "Suspendisse consequat dolor urna, sit amet accumsan lectus luctus eget. Vestibulum maximus ante vel placerat cursus. Nulla luctus augue ac vulputate aliquet." });
+            context.Replies.AddOrUpdate(new Models.Reply { Id = "rep8", PostId = "1", CommentId = "cmt2", ParentReplyId = "rep7", DateTime = DateTime.Now, UserName = "taylor", Body = "Donec aliquam, sem a tincidunt tincidunt, orci velit mollis magna, vel auctor arcu augue nec risus. Integer luctus enim ac viverra luctus." });
+
 
         }
     }

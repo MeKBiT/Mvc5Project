@@ -291,6 +291,175 @@ namespace Mvc5Project.DAL
         }
         #endregion
 
+        public IList<Comment> GetPostComments(Post post)
+        {
+            return _context.Comments.Where(p => p.PostId == post.Id).ToList();
+        }
+
+        public List<CommentViewModel> GetParentReplies(Comment comment)
+        {
+            var parentReplies = _context.Replies.Where(p => p.CommentId == comment.Id && p.ParentReplyId == null).ToList();
+            List<CommentViewModel> parReplies = new List<CommentViewModel>();
+            foreach (var pr in parentReplies)
+            {
+                var chReplies = GetChildReplies(pr);
+                parReplies.Add(new CommentViewModel() { Body = pr.Body, ParentReplyId = pr.ParentReplyId, DateTime = pr.DateTime, Id = pr.Id, UserName = pr.UserName, ChildReplies = chReplies });
+            }
+            return parReplies;
+        }
+
+        public List<CommentViewModel> GetChildReplies(Reply parentReply)
+        {
+            List<CommentViewModel> chldReplies = new List<CommentViewModel>();
+            if (parentReply != null)
+            {
+                var childReplies = _context.Replies.Where(p => p.ParentReplyId == parentReply.Id).ToList();
+                foreach (var reply in childReplies)
+                {
+                    var chReplies = GetChildReplies(reply);
+                    chldReplies.Add(new CommentViewModel() { Body = reply.Body, ParentReplyId = reply.ParentReplyId, DateTime = reply.DateTime, Id = reply.Id, UserName = reply.UserName, ChildReplies = chReplies });
+                }
+            }
+            return chldReplies;
+        }
+
+
+        public Reply GetReplyById(string id)
+        {
+            return _context.Replies.Where(p => p.Id == id).FirstOrDefault();
+        }
+
+
+        public bool CommentDeleteCheck(string commentid)
+        {
+            return _context.Comments.Where(x => x.Id == commentid).Select(x => x.Deleted).FirstOrDefault();
+        }
+        public bool ReplyDeleteCheck(string replyid)
+        {
+            return _context.Replies.Where(x => x.Id == replyid).Select(x => x.Deleted).FirstOrDefault();
+        }
+
+
+        public void UpdateCommentLike(string commentid, string username, string likeordislike)
+        {
+            var commentLike = _context.CommentLikes.Where(x => x.Username == username && x.CommentId == commentid).FirstOrDefault();
+            if (commentLike != null)
+            {
+                switch (likeordislike)
+                {
+                    case "like":
+                        if (commentLike.Like == false) { commentLike.Like = true; commentLike.Dislike = false; }
+                        else commentLike.Like = false;
+                        break;
+                    case "dislike":
+                        if (commentLike.Dislike == false) { commentLike.Dislike = true; commentLike.Like = false; }
+                        else commentLike.Dislike = false;
+                        break;
+                }
+                if (commentLike.Like == false && commentLike.Dislike == false) _context.CommentLikes.Remove(commentLike);
+            }
+            else
+            {
+                switch (likeordislike)
+                {
+                    case "like":
+                        commentLike = new CommentLike() { CommentId = commentid, Username = username, Like = true, Dislike = false };
+                        _context.CommentLikes.Add(commentLike);
+                        break;
+                    case "dislike":
+                        commentLike = new CommentLike() { CommentId = commentid, Username = username, Like = false, Dislike = true };
+                        _context.CommentLikes.Add(commentLike);
+                        break;
+                }
+            }
+            var comment = _context.Comments.Where(x => x.Id == commentid).FirstOrDefault();
+            comment.NetLikeCount = LikeDislikeCount("commentlike", commentid) - LikeDislikeCount("commentdislike", commentid);
+            Save();
+        }
+
+        public void UpdateReplyLike(string replyid, string username, string likeordislike)
+        {
+            var replyLike = _context.ReplyLikes.Where(x => x.Username == username && x.ReplyId == replyid).FirstOrDefault();
+            if (replyLike != null)
+            {
+                switch (likeordislike)
+                {
+                    case "like":
+                        if (replyLike.Like == false) { replyLike.Like = true; replyLike.Dislike = false; }
+                        else replyLike.Like = false;
+                        break;
+                    case "dislike":
+                        if (replyLike.Dislike == false) { replyLike.Dislike = true; replyLike.Like = false; }
+                        else replyLike.Dislike = false;
+                        break;
+                }
+                if (replyLike.Like == false && replyLike.Dislike == false) _context.ReplyLikes.Remove(replyLike);
+            }
+            else
+            {
+                switch (likeordislike)
+                {
+                    case "like":
+                        replyLike = new ReplyLike() { ReplyId = replyid, Username = username, Like = true, Dislike = false };
+                        _context.ReplyLikes.Add(replyLike);
+                        break;
+                    case "dislike":
+                        replyLike = new ReplyLike() { ReplyId = replyid, Username = username, Like = false, Dislike = true };
+                        _context.ReplyLikes.Add(replyLike);
+                        break;
+                }
+            }
+            Save();
+        }
+
+        public Post GetPostByReply(string replyid)
+        {
+            var postid = _context.Replies.Where(x => x.Id == replyid).Select(x => x.PostId).FirstOrDefault();
+            return _context.Posts.Where(x => x.Id == postid).FirstOrDefault();
+        }
+
+
+
+
+        public IList<Comment> GetComments()
+        {
+            return _context.Comments.ToList();
+        }
+        public IList<Reply> GetReplies()
+        {
+            return _context.Replies.ToList();
+        }
+        public void AddNewComment(Comment comment)
+        {
+            _context.Comments.Add(comment);
+            Save();
+        }
+        public void AddNewReply(Reply reply)
+        {
+            _context.Replies.Add(reply);
+            Save();
+        }
+
+
+
+        public Comment GetCommentById(string id)
+        {
+            return _context.Comments.Where(p => p.Id == id).FirstOrDefault();
+        }
+
+        public void DeleteComment(string commentid)
+        {
+            var comment = _context.Comments.Where(x => x.Id == commentid).FirstOrDefault();
+            _context.Comments.Remove(comment);
+            Save();
+        }
+        public void DeleteReply(string replyid)
+        {
+            var reply = _context.Replies.Where(x => x.Id == replyid).FirstOrDefault();
+            _context.Replies.Remove(reply);
+            Save();
+        }
+
 
 
 

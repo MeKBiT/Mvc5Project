@@ -1,0 +1,27 @@
+﻿@model Mvc5Project.Models.CommentViewModel
+
+@{
+    ViewBag.Title = "EditReply";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="newComment">
+    @using (Html.BeginForm("EditReply", "Blog", FormMethod.Post, new { @class = "comTextdivParent", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        <textarea name="replyBody" id="editComment">@Model.Body</textarea>
+        <script>
+            CKEDITOR.replace('editComment',
+                {
+                    customConfig: '/Scripts/ckEditorConfig1.js'
+                });
+        </script>
+        <div class="comTextSub">
+            <input name="replyid" value="@Model.Id" type="hidden" />
+            <input class="comTextBtn" type="submit" value="&#x27a5;" />
+        </div>
+
+    }
+</div>
+
+

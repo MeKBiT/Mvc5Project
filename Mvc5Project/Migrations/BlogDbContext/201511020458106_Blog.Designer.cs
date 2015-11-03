@@ -13,7 +13,7 @@ namespace Mvc5Project.Migrations.BlogDbContext
         
         string IMigrationMetadata.Id
         {
-            get { return "201510010321304_Blog"; }
+            get { return "201511020458106_Blog"; }
         }
         
         string IMigrationMetadata.Source

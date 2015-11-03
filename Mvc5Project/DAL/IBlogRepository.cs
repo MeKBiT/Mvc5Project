@@ -39,7 +39,24 @@ namespace Mvc5Project.DAL
         void AddNewPost(Post post);
         #endregion
 
+        IList<Comment> GetPostComments(Post post);
+        List<CommentViewModel> GetParentReplies(Comment comment);
+        List<CommentViewModel> GetChildReplies(Reply parentReply);
+        Reply GetReplyById(string id);
+        bool CommentDeleteCheck(string commentid);
+        bool ReplyDeleteCheck(string replyid);
 
+        void UpdateCommentLike(string commentid, string username, string likeordislike);
+        void UpdateReplyLike(string replyid, string username, string likeordislike);
+        Post GetPostByReply(string replyid);
+
+        IList<Comment> GetComments();
+        IList<Reply> GetReplies();
+        void AddNewComment(Comment comment);
+        void AddNewReply(Reply reply);
+        Comment GetCommentById(string id);
+        void DeleteComment(string commentid);
+        void DeleteReply(string replyid);
 
         void Save();
     }
