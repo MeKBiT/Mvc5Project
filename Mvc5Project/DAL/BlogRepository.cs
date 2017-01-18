@@ -28,6 +28,12 @@ namespace Mvc5Project.DAL
         {
             return _context.Categories.ToList();
         }
+        public string GetUrlSeoByReply(Reply reply)
+        {
+            var postId = _context.Comments.Where(x => x.Id == reply.CommentId).Select(x => x.PageId).FirstOrDefault();
+            return _context.Posts.Where(x => x.Id == postId).Select(x => x.UrlSeo).FirstOrDefault();
+        }
+
         public IList<Category> GetPostCategories(Post post)
         {
             var categoryIds = _context.PostCategories.Where(p => p.PostId == post.Id).Select(p => p.CategoryId).ToList();
@@ -262,8 +268,16 @@ namespace Mvc5Project.DAL
             var postLikes = _context.PostLikes.Where(p => p.PostId == postid).ToList();
             var postTags = _context.PostTags.Where(p => p.PostId == postid).ToList();
             var postVideos = _context.PostVideos.Where(p => p.PostId == postid).ToList();
-            var postComments = _context.Comments.Where(p => p.PostId == postid).ToList();
-            var postReplies = _context.Replies.Where(p => p.PostId == postid).ToList();
+            var postComments = _context.Comments.Where(p => p.PageId == postid).ToList();
+            List<Reply> postReplies = new List<Reply>();
+            foreach (var comment in postComments)
+            {
+                var replies = _context.Replies.Where(x => x.CommentId == comment.Id).ToList();
+                foreach (var reply in replies)
+                {
+                    postReplies.Add(reply);
+                }
+            }
             var post = _context.Posts.Find(postid);
             foreach (var pc in postCategories) _context.PostCategories.Remove(pc);
             foreach (var pl in postLikes) _context.PostLikes.Remove(pl);
@@ -293,9 +307,12 @@ namespace Mvc5Project.DAL
 
         public IList<Comment> GetPostComments(Post post)
         {
-            return _context.Comments.Where(p => p.PostId == post.Id).ToList();
+            return _context.Comments.Where(p => p.PageId == post.Id).ToList();
         }
-
+        public IList<Comment> GetCommentsByPageId(string pageId)
+        {
+            return _context.Comments.Where(p => p.PageId == pageId).ToList();
+        }
         public List<CommentViewModel> GetParentReplies(Comment comment)
         {
             var parentReplies = _context.Replies.Where(p => p.CommentId == comment.Id && p.ParentReplyId == null).ToList();
@@ -307,6 +324,7 @@ namespace Mvc5Project.DAL
             }
             return parReplies;
         }
+
         public List<CommentViewModel> GetChildReplies(Reply parentReply)
         {
             List<CommentViewModel> chldReplies = new List<CommentViewModel>();
@@ -322,6 +340,7 @@ namespace Mvc5Project.DAL
             return chldReplies;
         }
 
+
         public Reply GetReplyById(string id)
         {
             return _context.Replies.Where(p => p.Id == id).FirstOrDefault();
@@ -332,11 +351,11 @@ namespace Mvc5Project.DAL
         {
             return _context.Comments.Where(x => x.Id == commentid).Select(x => x.Deleted).FirstOrDefault();
         }
-
         public bool ReplyDeleteCheck(string replyid)
         {
             return _context.Replies.Where(x => x.Id == replyid).Select(x => x.Deleted).FirstOrDefault();
         }
+
 
         public void UpdateCommentLike(string commentid, string username, string likeordislike)
         {
@@ -374,6 +393,7 @@ namespace Mvc5Project.DAL
             comment.NetLikeCount = LikeDislikeCount("commentlike", commentid) - LikeDislikeCount("commentdislike", commentid);
             Save();
         }
+
         public void UpdateReplyLike(string replyid, string username, string likeordislike)
         {
             var replyLike = _context.ReplyLikes.Where(x => x.Username == username && x.ReplyId == replyid).FirstOrDefault();
@@ -408,11 +428,17 @@ namespace Mvc5Project.DAL
             }
             Save();
         }
+
         public Post GetPostByReply(string replyid)
         {
-            var postid = _context.Replies.Where(x => x.Id == replyid).Select(x => x.PostId).FirstOrDefault();
-            return _context.Posts.Where(x => x.Id == postid).FirstOrDefault();
+            var commentId = _context.Replies.Where(x => x.Id == replyid).Select(x => x.CommentId).FirstOrDefault();
+            var postId = _context.Comments.Where(x => x.Id == commentId).Select(x => x.PageId).FirstOrDefault();
+            return _context.Posts.Where(x => x.Id == postId).FirstOrDefault();
         }
+
+
+
+
         public IList<Comment> GetComments()
         {
             return _context.Comments.ToList();
@@ -431,6 +457,9 @@ namespace Mvc5Project.DAL
             _context.Replies.Add(reply);
             Save();
         }
+
+
+
         public Comment GetCommentById(string id)
         {
             return _context.Comments.Where(p => p.Id == id).FirstOrDefault();
@@ -442,13 +471,13 @@ namespace Mvc5Project.DAL
             _context.Comments.Remove(comment);
             Save();
         }
-        
         public void DeleteReply(string replyid)
         {
             var reply = _context.Replies.Where(x => x.Id == replyid).FirstOrDefault();
             _context.Replies.Remove(reply);
             Save();
         }
+
 
 
 

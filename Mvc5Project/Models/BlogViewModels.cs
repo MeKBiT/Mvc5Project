@@ -70,7 +70,7 @@ namespace Mvc5Project.Models
     public class Comment
     {
         public string Id { get; set; }
-        public string PostId { get; set; }
+        public string PageId { get; set; }
         public DateTime DateTime { get; set; }
         public string UserName { get; set; }
         [Required]
@@ -81,12 +81,12 @@ namespace Mvc5Project.Models
         public bool Deleted { get; set; }
         public Post Post { get; set; }
         public ICollection<Reply> Replies { get; set; }
+
         public ICollection<CommentLike> CommentLikes { get; set; }
     }
     public class Reply
     {
         public string Id { get; set; }
-        public string PostId { get; set; }
         public string CommentId { get; set; }
         public string ParentReplyId { get; set; }
         public DateTime DateTime { get; set; }
@@ -187,6 +187,8 @@ namespace Mvc5Project.Models
         public IList<Category> PostCategories { get; set; }
         public IList<Tag> PostTags { get; set; }
         public string UrlSlug { get; set; }
+        public CommentViewModel CommentViewModel { get; set; }
+        public PagedList.IPagedList<BlogViewModel> PagedBlogViewModel { get; set; }
     }
 
     public class AllPostsViewModel
@@ -223,11 +225,9 @@ namespace Mvc5Project.Models
         public string ShortDescription { get; set; }
         public IList<Category> Categories { get; set; }
         public IList<Tag> Tags { get; set; }
-        public IList<Comment> Comments { get; set; }
 
-
+        public CommentViewModel CommentViewModel { get; set; }
     }
-
     public class CommentViewModel
     {
         public CommentViewModel() { }
@@ -235,7 +235,10 @@ namespace Mvc5Project.Models
         {
             Comment = comment;
         }
+        public IList<Comment> Comments { get; set; }
+        public string ID { get; set; }
         public Comment Comment { get; set; }
+        public string UrlSeo { get; set; }
         public DateTime DateTime { get; set; }
         public IList<CommentViewModel> ChildReplies { get; set; }
         public string Body { get; set; }
@@ -243,4 +246,6 @@ namespace Mvc5Project.Models
         public string ParentReplyId { get; set; }
         public string UserName { get; set; }
     }
+
+
 }

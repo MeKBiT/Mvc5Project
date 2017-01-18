@@ -16,7 +16,7 @@ namespace Mvc5Project.Controllers
 {
     public class BlogController : Controller
     {
-        
+
         private IBlogRepository _blogRepository;
         public static List<BlogViewModel> postList = new List<BlogViewModel>();
         public static List<AllPostsViewModel> allPostsList = new List<AllPostsViewModel>();
@@ -25,6 +25,8 @@ namespace Mvc5Project.Controllers
 
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+
+
 
         public BlogController()
         {
@@ -36,9 +38,8 @@ namespace Mvc5Project.Controllers
             _blogRepository = blogRepository;
             UserManager = userManager;
             SignInManager = signInManager;
+
         }
-
-
         public ApplicationSignInManager SignInManager
         {
             get
@@ -77,8 +78,10 @@ namespace Mvc5Project.Controllers
             CreateCatAndTagList();
 
 
-            Posts(page, sortOrder, searchString, searchCategory, searchTag);
-            return View();
+            BlogViewModel model = new BlogViewModel();
+            model.CommentViewModel = CreateCommentViewModel("mainPage", sortOrder);
+            model.PagedBlogViewModel = CreatePagedBlogViewModel(page, sortOrder, searchString, searchCategory, searchTag);
+            return View(model);
         }
 
         #endregion Index
@@ -86,7 +89,12 @@ namespace Mvc5Project.Controllers
         #region Posts/AllPosts
 
         [ChildActionOnly]
-        public ActionResult Posts(int? page, string sortOrder, string searchString, string[] searchCategory, string[] searchTag)
+        public ActionResult Posts()
+        {
+            return PartialView();
+        }
+
+        public IPagedList<BlogViewModel> CreatePagedBlogViewModel(int? page, string sortOrder, string searchString, string[] searchCategory, string[] searchTag)
         {
             postList.Clear();
 
@@ -177,9 +185,9 @@ namespace Mvc5Project.Controllers
 
             int pageSize = 2;
             int pageNumber = (page ?? 1);
-
-            return PartialView("Posts", postList.ToPagedList(pageNumber, pageSize));
+            return postList.ToPagedList(pageNumber, pageSize);
         }
+
 
         [HttpGet]
         [AllowAnonymous]
@@ -286,10 +294,10 @@ namespace Mvc5Project.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult Post(string sortOrder,string slug)
+        public ActionResult Post(string sortOrder, string slug)
         {
             PostViewModel model = new PostViewModel();
-            var posts = _blogRepository.GetPosts();
+            var posts = GetPosts();
             var postid = _blogRepository.GetPostIdBySlug(slug);
             var post = _blogRepository.GetPostById(postid);
             var videos = GetPostVideos(post);
@@ -309,7 +317,7 @@ namespace Mvc5Project.Controllers
             model.Body = post.Body;
             model.PostLikes = _blogRepository.LikeDislikeCount("postlike", post.Id);
             model.PostDislikes = _blogRepository.LikeDislikeCount("postdislike", post.Id);
-            Comments(model, post, sortOrder);
+            model.CommentViewModel = CreateCommentViewModel(post.Id, sortOrder);
             return View(model);
         }
 
@@ -370,7 +378,7 @@ namespace Mvc5Project.Controllers
             return RedirectToAction("EditPost", new { slug = slug });
         }
 
-        
+
         [Authorize(Roles = "Admin")]
         public ActionResult RemoveVideoFromPost(string slug, string postid, string videoUrl)
         {
@@ -713,14 +721,21 @@ namespace Mvc5Project.Controllers
         #endregion Rss
 
         [ChildActionOnly]
-        public ActionResult Comments(PostViewModel model, Post post, string sortOrder)
+        public ActionResult Comments(string pageId, string sortOrder)
         {
+            return PartialView();
+        }
+
+        public CommentViewModel CreateCommentViewModel(string pageId, string sortOrder)
+        {
+            CommentViewModel model = new CommentViewModel();
+
             ViewBag.CurrentSort = sortOrder;
             ViewBag.DateSortParm = string.IsNullOrEmpty(sortOrder) ? "date_asc" : "";
             ViewBag.BestSortParm = sortOrder == "Best" ? "best_desc" : "Best";
-            var postComments = _blogRepository.GetPostComments(post).OrderByDescending(d => d.DateTime).ToList();
 
-            foreach (var comment in postComments)
+            var comments = _blogRepository.GetCommentsByPageId(pageId).OrderByDescending(d => d.DateTime).ToList();
+            foreach (var comment in comments)
             {
                 var likes = LikeDislikeCount("commentlike", comment.Id);
                 var dislikes = LikeDislikeCount("commentdislike", comment.Id);
@@ -733,31 +748,35 @@ namespace Mvc5Project.Controllers
                     comment.Replies.Add(rep);
                 }
             }
+            if (pageId.Contains("post"))
+            {
+                model.UrlSeo = _blogRepository.GetPostById(pageId).UrlSeo;
+            }
+
 
             switch (sortOrder)
             {
                 case "date_asc":
-                    postComments = postComments.OrderBy(x => x.DateTime).ToList();
+                    comments = comments.OrderBy(x => x.DateTime).ToList();
                     ViewBag.DateSortLink = "active";
                     break;
                 case "Best":
-                    postComments = postComments.OrderByDescending(x => x.NetLikeCount).ToList();
+                    comments = comments.OrderByDescending(x => x.NetLikeCount).ToList();
                     ViewBag.BestSortLink = "active";
                     break;
                 case "best_desc":
-                    postComments = postComments.OrderBy(x => x.NetLikeCount).ToList();
+                    comments = comments.OrderBy(x => x.NetLikeCount).ToList();
                     ViewBag.BestSortLink = "active";
                     break;
                 default:
-                    postComments = postComments.OrderByDescending(x => x.DateTime).ToList();
+                    comments = comments.OrderByDescending(x => x.DateTime).ToList();
                     ViewBag.DateSortLink = "active";
                     break;
             }
-            model.UrlSeo = post.UrlSeo;
-            model.Comments = postComments;
-            return PartialView(model);
-        }
 
+            model.Comments = comments;
+            return model;
+        }
         public PartialViewResult Replies()
         {
             return PartialView();
@@ -767,6 +786,7 @@ namespace Mvc5Project.Controllers
         {
             return PartialView();
         }
+
 
         public ActionResult UpdateCommentLike(string commentid, string username, string likeordislike, string slug, string sortorder)
         {
@@ -790,7 +810,7 @@ namespace Mvc5Project.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ValidateInput(false)]
-        public ActionResult NewComment(string commentBody, string comUserName, string slug, string postid)
+        public ActionResult NewComment(string commentBody, string comUserName, string slug, string pageId)
         {
             List<int> numlist = new List<int>();
             int num = 0;
@@ -815,7 +835,7 @@ namespace Mvc5Project.Controllers
             var comment = new Comment()
             {
                 Id = newid,
-                PostId = postid,
+                PageId = pageId,
                 DateTime = DateTime.Now,
                 UserName = comUserName,
                 Body = commentBody,
@@ -856,7 +876,6 @@ namespace Mvc5Project.Controllers
                 var reply = new Reply()
                 {
                     Id = newid,
-                    PostId = postid,
                     CommentId = commentid,
                     ParentReplyId = null,
                     DateTime = DateTime.Now,
@@ -867,6 +886,7 @@ namespace Mvc5Project.Controllers
             }
             return RedirectToAction("Post", new { slug = slug });
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -900,7 +920,6 @@ namespace Mvc5Project.Controllers
                 var reply = new Reply()
                 {
                     Id = newid,
-                    PostId = preply.PostId,
                     CommentId = preply.CommentId,
                     ParentReplyId = preply.Id,
                     DateTime = DateTime.Now,
@@ -909,8 +928,10 @@ namespace Mvc5Project.Controllers
                 };
                 _blogRepository.AddNewReply(reply);
             }
-            return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == preply.PostId).FirstOrDefault().UrlSeo });
+            return RedirectToAction("Post", new { slug = _blogRepository.GetUrlSeoByReply(preply) });
         }
+
+
 
         [HttpGet]
         public async Task<ActionResult> EditComment(CommentViewModel model, string commentid)
@@ -925,10 +946,11 @@ namespace Mvc5Project.Controllers
             }
             else
             {
-                return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == comment.PostId).FirstOrDefault().UrlSeo });
+                return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == comment.PageId).FirstOrDefault().UrlSeo });
             }
 
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ValidateInput(false)]
@@ -938,8 +960,9 @@ namespace Mvc5Project.Controllers
             comment.Body = commentBody;
             comment.DateTime = DateTime.Now;
             _blogRepository.Save();
-            return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == comment.PostId).FirstOrDefault().UrlSeo });
+            return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == comment.PageId).FirstOrDefault().UrlSeo });
         }
+
 
         [HttpGet]
         public async Task<ActionResult> DeleteComment(CommentViewModel model, string commentid)
@@ -953,16 +976,17 @@ namespace Mvc5Project.Controllers
             }
             else
             {
-                return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == comment.PostId).FirstOrDefault().UrlSeo });
+                return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == comment.PageId).FirstOrDefault().UrlSeo });
             }
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteComment(string commentid)
         {
             var comment = _blogRepository.GetCommentById(commentid);
-            var postid = comment.PostId;
+            var postid = comment.PageId;
             var repliesList = _blogRepository.GetParentReplies(comment);
             if (repliesList.Count() == 0)
             {
@@ -978,6 +1002,7 @@ namespace Mvc5Project.Controllers
             return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == postid).FirstOrDefault().UrlSeo });
         }
 
+
         [HttpGet]
         public async Task<ActionResult> EditReply(CommentViewModel model, string replyid)
         {
@@ -991,9 +1016,10 @@ namespace Mvc5Project.Controllers
             }
             else
             {
-                return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == reply.PostId).FirstOrDefault().UrlSeo });
+                return RedirectToAction("Post", new { slug = _blogRepository.GetUrlSeoByReply(reply) });
             }
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -1004,8 +1030,9 @@ namespace Mvc5Project.Controllers
             reply.Body = replyBody;
             reply.DateTime = DateTime.Now;
             _blogRepository.Save();
-            return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == reply.PostId).FirstOrDefault().UrlSeo });
+            return RedirectToAction("Post", new { slug = _blogRepository.GetUrlSeoByReply(reply) });
         }
+
 
         [HttpGet]
         public async Task<ActionResult> DeleteReply(CommentViewModel model, string replyid)
@@ -1019,7 +1046,7 @@ namespace Mvc5Project.Controllers
             }
             else
             {
-                return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == reply.PostId).FirstOrDefault().UrlSeo });
+                return RedirectToAction("Post", new { slug = _blogRepository.GetUrlSeoByReply(reply) });
             }
         }
 
@@ -1029,7 +1056,7 @@ namespace Mvc5Project.Controllers
         {
             var reply = _blogRepository.GetReplyById(replyid);
             var repliesList = _blogRepository.GetChildReplies(reply);
-            var postid = reply.PostId;
+            var postid = _blogRepository.GetUrlSeoByReply(reply);
             if (repliesList.Count() == 0)
             {
                 _blogRepository.DeleteReply(replyid);
@@ -1047,24 +1074,32 @@ namespace Mvc5Project.Controllers
 
 
 
+
         #region Helpers
 
-        public int LikeDislikeCount(string typeAndlike, string id)
+        private async Task<ApplicationUser> GetCurrentUserAsync()
         {
-            switch (typeAndlike)
-            {
-                case "commentlike":
-                    return _blogRepository.LikeDislikeCount("commentlike", id);
-                case "commentdislike":
-                    return _blogRepository.LikeDislikeCount("commentdislike", id);
-                case "replylike":
-                    return _blogRepository.LikeDislikeCount("replylike", id);
-                case "replydislike":
-                    return _blogRepository.LikeDislikeCount("replydislike", id);
-                default:
-                    return 0;
-            }
+            return await UserManager.FindByIdAsync(User.Identity.GetUserId());
         }
+
+
+        public List<CommentViewModel> GetChildReplies(Reply parentReply)
+        {
+            return _blogRepository.GetChildReplies(parentReply);
+        }
+
+
+        public bool CommentDeleteCheck(string commentid)
+        {
+            return _blogRepository.CommentDeleteCheck(commentid);
+        }
+        public bool ReplyDeleteCheck(string replyid)
+        {
+            return _blogRepository.ReplyDeleteCheck(replyid);
+        }
+
+
+
         public static string TimePassed(DateTime postDate)
         {
             string date = null;
@@ -1120,18 +1155,6 @@ namespace Mvc5Project.Controllers
             }
 
             return date;
-        }
-        public bool CommentDeleteCheck(string commentid)
-        {
-            return _blogRepository.CommentDeleteCheck(commentid);
-        }
-        public bool ReplyDeleteCheck(string replyid)
-        {
-            return _blogRepository.ReplyDeleteCheck(replyid);
-        }
-        public List<CommentViewModel> GetChildReplies(Reply parentReply)
-        {
-            return _blogRepository.GetChildReplies(parentReply);
         }
 
 
@@ -1192,6 +1215,38 @@ namespace Mvc5Project.Controllers
             return replyDetails;
         }
 
+        public int LikeDislikeCount(string typeAndlike, string id)
+        {
+            switch (typeAndlike)
+            {
+                case "commentlike":
+                    return _blogRepository.LikeDislikeCount("commentlike", id);
+                case "commentdislike":
+                    return _blogRepository.LikeDislikeCount("commentdislike", id);
+                case "replylike":
+                    return _blogRepository.LikeDislikeCount("replylike", id);
+                case "replydislike":
+                    return _blogRepository.LikeDislikeCount("replydislike", id);
+                default:
+                    return 0;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1242,10 +1297,7 @@ namespace Mvc5Project.Controllers
             model.ShortDescription = post.ShortDescription;
             return model;
         }
-        private async Task<ApplicationUser> GetCurrentUserAsync()
-        {
-            return await UserManager.FindByIdAsync(User.Identity.GetUserId());
-        }
+
 
         #endregion
     }

@@ -1,6 +1,7 @@
-﻿@model Mvc5Project.Models.PostViewModel
+﻿@model PostViewModel
 @using Mvc5Project.Controllers
 @using Microsoft.AspNet.Identity
+@using Mvc5Project.Models
 @{
     ViewBag.Title = Model.Title;
     if (Model.PostTags != null)
@@ -12,17 +13,15 @@
 }
 @section Scripts
 {
-<script src="~/Scripts/view.js"></script>
+    <script src="~/Scripts/view.js"></script>
     <script src="~/ckeditor/ckeditor.js"></script>
 }
-
-
 
 
 <div id="postScroll">
     <div class="postContainer">
         @if (User.IsInRole("Admin"))
-        {
+            {
             <div class="postMenu">
                 <div class="postMenuSub">
                     <a href="@Url.Action("EditPost","Blog",new {slug = Model.UrlSeo })" title="Edit"><img src="@Url.Content("~/Content/images/post/edit.png")" width="25" height="25" alt="edit" /></a>
@@ -39,7 +38,6 @@
             {
                 @Html.ActionLink("Next >>", "Post", "Blog", new { slug = Model.NextPostSlug, sortorder = ViewBag.CurrentSort }, new { style = "float:right;" })
             }
-
         </div>
         <div class="postTitle"><h2>@Model.Title</h2></div>
         <div class="addthis_sharing_toolbox"></div>
@@ -52,9 +50,9 @@
             </table>
         </div>
         @if (Model.Videos != null)
-        {
-            foreach (var video in Model.Videos)
             {
+                foreach (var video in Model.Videos)
+                {
                 <div class="postVideo">
                     <iframe width="560" height="315" src="@video.VideoUrl" frameborder="0" allowfullscreen></iframe>
                 </div>
@@ -65,5 +63,6 @@
         }
         <div class="postBody">@Html.Raw(Model.Body)</div>
     </div>
-    @{Html.RenderPartial("Comments");}
+
+    @{Html.RenderPartial("Comments", Model.CommentViewModel);}
 </div>

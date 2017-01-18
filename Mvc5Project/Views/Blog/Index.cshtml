@@ -1,7 +1,6 @@
-﻿@model PagedList.IPagedList<Mvc5Project.Models.BlogViewModel>
+﻿@model BlogViewModel
 @using Mvc5Project.Controllers
-
-
+@using Mvc5Project.Models
 @{
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -9,28 +8,24 @@
     var tags = BlogController.checkTagList;
 
 }
-
 <div class="blogContainer">
     <div class="mainblogview">
-        @{Html.RenderPartial("Posts");}
+        @{Html.RenderPartial("Posts", Model.PagedBlogViewModel);}
     </div>
     <div class="mainblogbar">
-
         @if (User.IsInRole("Admin"))
-        {
+            {
             <div class="adminBlogCtrl">
                 <table>
                     <tr>
                         <td><a href="@Url.Action("AddNewPost","Blog")">Add New Post</a></td>
                     </tr>
-
                     <tr>
                         <td><a href="@Url.Action("CategoriesAndTags","Blog")">Categories And Tags</a></td>
                     </tr>
                 </table>
             </div>
         }
-
 
         <div class="blogControlPanel">
             @using (Html.BeginForm("Index", "Blog", FormMethod.Get, new { @class = "indexSearchForm" }))
@@ -51,16 +46,14 @@
                 }
                 <input type="hidden" name="sortOrder" value="@ViewBag.CurrentSort" />
                 <input type="search" name="searchString" value="@ViewBag.CurrentSearchString" placeholder="Search..." />
-                <input type="submit" value="&#128270;" style="background:none;border:none;" />
+                    <input type="submit" value="&#128270;" style="background:none;border:none;" />
             }
             @{
                 var rssUrl = Request.Url.Scheme + "://" + Request.Url.Host + "/Blog/feed";
             }
             <div style="margin:10px;"><a href="@rssUrl" style="text-decoration:none;color:blue;" title="RSS">RSS Feed</a></div>
             <div style="margin:10px;"><a href="@Url.Action("AllPosts", "Blog")" style="text-decoration:none;color:blue;" title="Posts">Post List</a></div>
-
             <div style="color:blue;cursor:pointer;float:left;width:300px;margin:10px;" id="indexFilterBtn">Filter</div>
-
             @using (Html.BeginForm("Index", "Blog", FormMethod.Get, new { @class = "indexFilterForm" }))
             {
                 <table class="blogCtrlTable">
@@ -115,7 +108,8 @@
                 </table>
             }
         </div>
-
     </div>
 </div>
-
+<div class="mainComments">
+    @{Html.RenderPartial("Comments", Model.CommentViewModel);}
+</div>

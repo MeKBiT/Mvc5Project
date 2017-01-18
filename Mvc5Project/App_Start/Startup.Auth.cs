@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
+using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.Facebook;
 using Microsoft.Owin.Security.Google;
@@ -99,13 +100,13 @@ namespace Mvc5Project
 
             #endregion Twitter
 
-            #region LinkedIn
+            //#region LinkedIn
 
-            app.UseLinkedInAuthentication(
-                clientId: "77g2s7wgbminls",
-                clientSecret: "20S5G0D0Lh40IRKW"
-                );
-            #endregion
+            //app.UseLinkedInAuthentication(
+            //    clientId: "77g2s7wgbminls",
+            //    clientSecret: "20S5G0D0Lh40IRKW"
+            //    );
+            //#endregion
 
             #region Facebook
             var facebookAuthenticationOptions = new FacebookAuthenticationOptions()
