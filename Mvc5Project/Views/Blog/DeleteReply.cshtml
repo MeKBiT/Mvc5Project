@@ -1,0 +1,19 @@
+﻿@model Mvc5Project.Models.CommentViewModel
+
+@{
+    ViewBag.Title = "DeleteReply";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using (Html.BeginForm("DeleteReply", "Blog", FormMethod.Post, new { @role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="delacccont">
+        <div class="delaccgrp">
+            <div class="delacclbl" style="text-align:center;">Are you sure?</div>
+        </div>
+        <div class="delaccgrp">
+            <input type="hidden" value="@Model.Id" name="replyid" />
+            <input type="submit" value="Delete Reply" class="btn btn-default delaccbtn" />
+        </div>
+    </div>
+}

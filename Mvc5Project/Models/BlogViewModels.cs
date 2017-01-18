@@ -223,10 +223,24 @@ namespace Mvc5Project.Models
         public string ShortDescription { get; set; }
         public IList<Category> Categories { get; set; }
         public IList<Tag> Tags { get; set; }
-
+        public IList<Comment> Comments { get; set; }
 
 
     }
 
-
+    public class CommentViewModel
+    {
+        public CommentViewModel() { }
+        public CommentViewModel(Comment comment)
+        {
+            Comment = comment;
+        }
+        public Comment Comment { get; set; }
+        public DateTime DateTime { get; set; }
+        public IList<CommentViewModel> ChildReplies { get; set; }
+        public string Body { get; set; }
+        public string Id { get; set; }
+        public string ParentReplyId { get; set; }
+        public string UserName { get; set; }
+    }
 }

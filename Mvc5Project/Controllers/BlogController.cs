@@ -1,10 +1,14 @@
-﻿using Mvc5Project.DAL;
+﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
+using Mvc5Project.DAL;
 using Mvc5Project.Models;
 using PagedList;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.ServiceModel.Syndication;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -19,16 +23,48 @@ namespace Mvc5Project.Controllers
         public static List<AllPostsViewModel> checkCatList = new List<AllPostsViewModel>();
         public static List<AllPostsViewModel> checkTagList = new List<AllPostsViewModel>();
 
+        private ApplicationSignInManager _signInManager;
+        private ApplicationUserManager _userManager;
 
         public BlogController()
         {
             _blogRepository = new BlogRepository(new BlogDbContext());
         }
 
-        public BlogController(IBlogRepository blogRepository)
+        public BlogController(IBlogRepository blogRepository, ApplicationUserManager userManager, ApplicationSignInManager signInManager)
         {
             _blogRepository = blogRepository;
+            UserManager = userManager;
+            SignInManager = signInManager;
         }
+
+
+        public ApplicationSignInManager SignInManager
+        {
+            get
+            {
+                return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
+            }
+            private set
+            {
+                _signInManager = value;
+            }
+        }
+
+
+        public ApplicationUserManager UserManager
+        {
+            get
+            {
+                return _userManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            }
+            private set
+            {
+                _userManager = value;
+            }
+        }
+
+
 
         #region Index
 
@@ -250,10 +286,10 @@ namespace Mvc5Project.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult Post(string slug)
+        public ActionResult Post(string sortOrder,string slug)
         {
             PostViewModel model = new PostViewModel();
-            var posts = GetPosts();
+            var posts = _blogRepository.GetPosts();
             var postid = _blogRepository.GetPostIdBySlug(slug);
             var post = _blogRepository.GetPostById(postid);
             var videos = GetPostVideos(post);
@@ -273,6 +309,7 @@ namespace Mvc5Project.Controllers
             model.Body = post.Body;
             model.PostLikes = _blogRepository.LikeDislikeCount("postlike", post.Id);
             model.PostDislikes = _blogRepository.LikeDislikeCount("postdislike", post.Id);
+            Comments(model, post, sortOrder);
             return View(model);
         }
 
@@ -675,10 +712,492 @@ namespace Mvc5Project.Controllers
 
         #endregion Rss
 
+        [ChildActionOnly]
+        public ActionResult Comments(PostViewModel model, Post post, string sortOrder)
+        {
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.DateSortParm = string.IsNullOrEmpty(sortOrder) ? "date_asc" : "";
+            ViewBag.BestSortParm = sortOrder == "Best" ? "best_desc" : "Best";
+            var postComments = _blogRepository.GetPostComments(post).OrderByDescending(d => d.DateTime).ToList();
+
+            foreach (var comment in postComments)
+            {
+                var likes = LikeDislikeCount("commentlike", comment.Id);
+                var dislikes = LikeDislikeCount("commentdislike", comment.Id);
+                comment.NetLikeCount = likes - dislikes;
+                if (comment.Replies != null) comment.Replies.Clear();
+                List<CommentViewModel> replies = _blogRepository.GetParentReplies(comment);
+                foreach (var reply in replies)
+                {
+                    var rep = _blogRepository.GetReplyById(reply.Id);
+                    comment.Replies.Add(rep);
+                }
+            }
+
+            switch (sortOrder)
+            {
+                case "date_asc":
+                    postComments = postComments.OrderBy(x => x.DateTime).ToList();
+                    ViewBag.DateSortLink = "active";
+                    break;
+                case "Best":
+                    postComments = postComments.OrderByDescending(x => x.NetLikeCount).ToList();
+                    ViewBag.BestSortLink = "active";
+                    break;
+                case "best_desc":
+                    postComments = postComments.OrderBy(x => x.NetLikeCount).ToList();
+                    ViewBag.BestSortLink = "active";
+                    break;
+                default:
+                    postComments = postComments.OrderByDescending(x => x.DateTime).ToList();
+                    ViewBag.DateSortLink = "active";
+                    break;
+            }
+            model.UrlSeo = post.UrlSeo;
+            model.Comments = postComments;
+            return PartialView(model);
+        }
+
+        public PartialViewResult Replies()
+        {
+            return PartialView();
+        }
+
+        public PartialViewResult ChildReplies()
+        {
+            return PartialView();
+        }
+
+        public ActionResult UpdateCommentLike(string commentid, string username, string likeordislike, string slug, string sortorder)
+        {
+            if (username != null)
+            {
+                _blogRepository.UpdateCommentLike(commentid, username, likeordislike);
+            }
+            return RedirectToAction("Post", new { slug = slug, sortorder = sortorder });
+        }
+        public ActionResult UpdateReplyLike(string replyid, string username, string likeordislike, string sortorder)
+        {
+            if (username != null)
+            {
+                _blogRepository.UpdateReplyLike(replyid, username, likeordislike);
+            }
+            var slug = _blogRepository.GetPostByReply(replyid).UrlSeo;
+            return RedirectToAction("Post", "Blog", new { slug = slug, sortorder = sortorder });
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ValidateInput(false)]
+        public ActionResult NewComment(string commentBody, string comUserName, string slug, string postid)
+        {
+            List<int> numlist = new List<int>();
+            int num = 0;
+            var comments = _blogRepository.GetComments().ToList();
+            if (comments.Count() != 0)
+            {
+                foreach (var cmnt in comments)
+                {
+                    var comid = cmnt.Id;
+                    Int32.TryParse(comid.Replace("cmt", ""), out num);
+                    numlist.Add(num);
+                }
+                numlist.Sort();
+                num = numlist.Last();
+                num++;
+            }
+            else
+            {
+                num = 1;
+            }
+            var newid = "cmt" + num.ToString();
+            var comment = new Comment()
+            {
+                Id = newid,
+                PostId = postid,
+                DateTime = DateTime.Now,
+                UserName = comUserName,
+                Body = commentBody,
+                NetLikeCount = 0
+            };
+            _blogRepository.AddNewComment(comment);
+            return RedirectToAction("Post", new { slug = slug });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ValidateInput(false)]
+        public ActionResult NewParentReply(string replyBody, string comUserName, string postid, string commentid, string slug)
+        {
+            var comDelChck = CommentDeleteCheck(commentid);
+            if (!comDelChck)
+            {
+                List<int> numlist = new List<int>();
+                int num = 0;
+                var replies = _blogRepository.GetReplies().ToList();
+                if (replies.Count != 0)
+                {
+                    foreach (var rep in replies)
+                    {
+                        var repid = rep.Id;
+                        Int32.TryParse(repid.Replace("rep", ""), out num);
+                        numlist.Add(num);
+                    }
+                    numlist.Sort();
+                    num = numlist.Last();
+                    num++;
+                }
+                else
+                {
+                    num = 1;
+                }
+                var newid = "rep" + num.ToString();
+                var reply = new Reply()
+                {
+                    Id = newid,
+                    PostId = postid,
+                    CommentId = commentid,
+                    ParentReplyId = null,
+                    DateTime = DateTime.Now,
+                    UserName = comUserName,
+                    Body = replyBody,
+                };
+                _blogRepository.AddNewReply(reply);
+            }
+            return RedirectToAction("Post", new { slug = slug });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ValidateInput(false)]
+        public ActionResult NewChildReply(string preplyid, string comUserName, string replyBody)
+        {
+            var repDelCheck = ReplyDeleteCheck(preplyid);
+            var preply = _blogRepository.GetReplyById(preplyid);
+            if (!repDelCheck)
+            {
+                List<int> numlist = new List<int>();
+                int num = 0;
+                var replies = _blogRepository.GetReplies().ToList();
+                if (replies.Count != 0)
+                {
+                    foreach (var rep in replies)
+                    {
+                        var repid = rep.Id;
+                        Int32.TryParse(repid.Replace("rep", ""), out num);
+                        numlist.Add(num);
+                    }
+                    numlist.Sort();
+                    num = numlist.Last();
+                    num++;
+                }
+                else
+                {
+                    num = 1;
+                }
+                var newid = "rep" + num.ToString();
+                var reply = new Reply()
+                {
+                    Id = newid,
+                    PostId = preply.PostId,
+                    CommentId = preply.CommentId,
+                    ParentReplyId = preply.Id,
+                    DateTime = DateTime.Now,
+                    UserName = comUserName,
+                    Body = replyBody,
+                };
+                _blogRepository.AddNewReply(reply);
+            }
+            return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == preply.PostId).FirstOrDefault().UrlSeo });
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> EditComment(CommentViewModel model, string commentid)
+        {
+            var user = await GetCurrentUserAsync();
+            var comment = _blogRepository.GetCommentById(commentid);
+            if (comment.UserName == user.UserName)
+            {
+                model.Id = commentid;
+                model.Body = comment.Body;
+                return View(model);
+            }
+            else
+            {
+                return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == comment.PostId).FirstOrDefault().UrlSeo });
+            }
+
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ValidateInput(false)]
+        public ActionResult EditComment(string commentid, string commentBody)
+        {
+            var comment = _blogRepository.GetCommentById(commentid);
+            comment.Body = commentBody;
+            comment.DateTime = DateTime.Now;
+            _blogRepository.Save();
+            return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == comment.PostId).FirstOrDefault().UrlSeo });
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> DeleteComment(CommentViewModel model, string commentid)
+        {
+            var user = await GetCurrentUserAsync();
+            var comment = _blogRepository.GetCommentById(commentid);
+            if (comment.UserName == user.UserName)
+            {
+                model.Id = commentid;
+                return View(model);
+            }
+            else
+            {
+                return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == comment.PostId).FirstOrDefault().UrlSeo });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteComment(string commentid)
+        {
+            var comment = _blogRepository.GetCommentById(commentid);
+            var postid = comment.PostId;
+            var repliesList = _blogRepository.GetParentReplies(comment);
+            if (repliesList.Count() == 0)
+            {
+                _blogRepository.DeleteComment(commentid);
+            }
+            else
+            {
+                comment.DateTime = DateTime.Now;
+                comment.Body = "<p style=\"color:red;\"><i>This comment has been deleted.</i></p>";
+                comment.Deleted = true;
+                _blogRepository.Save();
+            }
+            return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == postid).FirstOrDefault().UrlSeo });
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> EditReply(CommentViewModel model, string replyid)
+        {
+            var user = await GetCurrentUserAsync();
+            var reply = _blogRepository.GetReplyById(replyid);
+            if (reply.UserName == user.UserName)
+            {
+                model.Id = replyid;
+                model.Body = reply.Body;
+                return View(model);
+            }
+            else
+            {
+                return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == reply.PostId).FirstOrDefault().UrlSeo });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ValidateInput(false)]
+        public ActionResult EditReply(string replyid, string replyBody)
+        {
+            var reply = _blogRepository.GetReplyById(replyid);
+            reply.Body = replyBody;
+            reply.DateTime = DateTime.Now;
+            _blogRepository.Save();
+            return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == reply.PostId).FirstOrDefault().UrlSeo });
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> DeleteReply(CommentViewModel model, string replyid)
+        {
+            var user = await GetCurrentUserAsync();
+            var reply = _blogRepository.GetReplyById(replyid);
+            if (reply.UserName == user.UserName)
+            {
+                model.Id = replyid;
+                return View(model);
+            }
+            else
+            {
+                return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == reply.PostId).FirstOrDefault().UrlSeo });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteReply(string replyid)
+        {
+            var reply = _blogRepository.GetReplyById(replyid);
+            var repliesList = _blogRepository.GetChildReplies(reply);
+            var postid = reply.PostId;
+            if (repliesList.Count() == 0)
+            {
+                _blogRepository.DeleteReply(replyid);
+            }
+            else
+            {
+                reply.DateTime = DateTime.Now;
+                reply.Body = "<p style=\"color:red;\"><i>This comment has been deleted.</i></p>";
+                reply.Deleted = true;
+                _blogRepository.Save();
+            }
+            return RedirectToAction("Post", new { slug = _blogRepository.GetPosts().Where(x => x.Id == postid).FirstOrDefault().UrlSeo });
+        }
+
 
 
 
         #region Helpers
+
+        public int LikeDislikeCount(string typeAndlike, string id)
+        {
+            switch (typeAndlike)
+            {
+                case "commentlike":
+                    return _blogRepository.LikeDislikeCount("commentlike", id);
+                case "commentdislike":
+                    return _blogRepository.LikeDislikeCount("commentdislike", id);
+                case "replylike":
+                    return _blogRepository.LikeDislikeCount("replylike", id);
+                case "replydislike":
+                    return _blogRepository.LikeDislikeCount("replydislike", id);
+                default:
+                    return 0;
+            }
+        }
+        public static string TimePassed(DateTime postDate)
+        {
+            string date = null;
+            double dateDiff = 0.0;
+            var timeDiff = DateTime.Now - postDate;
+            var yearPassed = timeDiff.TotalDays / 365;
+            var monthPassed = timeDiff.TotalDays / 30;
+            var dayPassed = timeDiff.TotalDays;
+            var hourPassed = timeDiff.TotalHours;
+            var minutePassed = timeDiff.TotalMinutes;
+            var secondPassed = timeDiff.TotalSeconds;
+            if (Math.Floor(yearPassed) > 0)
+            {
+                dateDiff = Math.Floor(yearPassed);
+                date = dateDiff == 1 ? dateDiff + " year ago" : dateDiff + " years ago";
+            }
+            else
+            {
+                if (Math.Floor(monthPassed) > 0)
+                {
+                    dateDiff = Math.Floor(monthPassed);
+                    date = dateDiff == 1 ? dateDiff + " month ago" : dateDiff + " months ago";
+                }
+                else
+                {
+                    if (Math.Floor(dayPassed) > 0)
+                    {
+                        dateDiff = Math.Floor(dayPassed);
+                        date = dateDiff == 1 ? dateDiff + " day ago" : dateDiff + " days ago";
+                    }
+                    else
+                    {
+                        if (Math.Floor(hourPassed) > 0)
+                        {
+                            dateDiff = Math.Floor(hourPassed);
+                            date = dateDiff == 1 ? dateDiff + " hour ago" : dateDiff + " hours ago";
+                        }
+                        else
+                        {
+                            if (Math.Floor(minutePassed) > 0)
+                            {
+                                dateDiff = Math.Floor(minutePassed);
+                                date = dateDiff == 1 ? dateDiff + " minute ago" : dateDiff + " minutes ago";
+                            }
+                            else
+                            {
+                                dateDiff = Math.Floor(secondPassed);
+                                date = dateDiff == 1 ? dateDiff + " second ago" : dateDiff + " seconds ago";
+                            }
+                        }
+                    }
+                }
+            }
+
+            return date;
+        }
+        public bool CommentDeleteCheck(string commentid)
+        {
+            return _blogRepository.CommentDeleteCheck(commentid);
+        }
+        public bool ReplyDeleteCheck(string replyid)
+        {
+            return _blogRepository.ReplyDeleteCheck(replyid);
+        }
+        public List<CommentViewModel> GetChildReplies(Reply parentReply)
+        {
+            return _blogRepository.GetChildReplies(parentReply);
+        }
+
+
+        public string[] NewCommentDetails(string username)
+        {
+            string[] newCommentDetails = new string[3];
+            newCommentDetails[0] = "td" + username; //comText
+            newCommentDetails[1] = "tdc" + username; //comTextdiv
+            newCommentDetails[2] = "tb" + username; //comTextBtn
+            return newCommentDetails;
+        }
+
+        public string[] CommentDetails(Comment comment)
+        {
+            string[] commentDetails = new string[17];
+            commentDetails[0] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(comment.UserName);//username
+            commentDetails[1] = "/Content/images/profile/" + commentDetails[0] + ".png?time=" + DateTime.Now.ToString();//imgUrl
+            commentDetails[2] = TimePassed(comment.DateTime);//passed time
+            commentDetails[3] = comment.DateTime.ToLongDateString().Replace(comment.DateTime.DayOfWeek.ToString() + ", ", "");//comment date
+            commentDetails[4] = "gp" + comment.Id; //grandparentid
+            commentDetails[5] = "mc" + comment.Id; //maincommentId
+            commentDetails[6] = "crp" + comment.Id; //repliesId
+            commentDetails[7] = "cex" + comment.Id; //commentExpid
+            commentDetails[8] = "ctex" + comment.Id; //ctrlExpId
+            commentDetails[9] = "ctflg" + comment.Id; //ctrlFlagId
+            commentDetails[10] = "sp" + comment.Id; //shareParentId
+            commentDetails[11] = "sc" + comment.Id; //shareChildId
+            commentDetails[12] = "td" + comment.Id; //comText
+            commentDetails[13] = "tdc" + comment.Id; //comTextdiv
+            commentDetails[14] = "rpl" + comment.Id; //Reply
+            commentDetails[15] = "cc1" + comment.Id; //commentControl
+            commentDetails[16] = "cc2" + comment.Id; //commentMenu
+            return commentDetails;
+        }
+
+        public string[] ReplyDetails(string replyId)
+        {
+            string[] replyDetails = new string[17];
+            var reply = _blogRepository.GetReplyById(replyId);
+            replyDetails[0] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(reply.UserName);//username
+            replyDetails[1] = "/Content/images/profile/" + replyDetails[0] + ".png?time=" + DateTime.Now.ToString(); //imgUrl
+            replyDetails[2] = TimePassed(reply.DateTime); //passed time
+            replyDetails[3] = reply.DateTime.ToLongDateString().Replace(reply.DateTime.DayOfWeek.ToString() + ", ", ""); //reply date
+            replyDetails[4] = "gp" + replyId; //grandparentid
+            replyDetails[5] = "rp" + replyId; //parentreplyId
+            replyDetails[6] = "crp" + replyId; //repliesId
+            replyDetails[7] = "cex" + replyId; //commentExpid
+            replyDetails[8] = "ctex" + replyId; //ctrlExpId
+            replyDetails[9] = "ctflg" + replyId; //ctrlFlagId
+            replyDetails[10] = "sp" + replyId; //shareParentId
+            replyDetails[11] = "sc" + replyId; //shareChildId;
+            replyDetails[12] = "td" + replyId; //comText
+            replyDetails[13] = "tdc" + replyId; //comTextdiv
+            replyDetails[14] = "rpl" + replyId; //Reply
+            replyDetails[15] = "cc1" + replyId; //commentControl
+            replyDetails[16] = "cc2" + replyId; //commentMenu
+
+            return replyDetails;
+        }
+
+
+
+
+
+
+
         public IList<Post> GetPosts()
         {
             return _blogRepository.GetPosts();
@@ -723,7 +1242,10 @@ namespace Mvc5Project.Controllers
             model.ShortDescription = post.ShortDescription;
             return model;
         }
-
+        private async Task<ApplicationUser> GetCurrentUserAsync()
+        {
+            return await UserManager.FindByIdAsync(User.Identity.GetUserId());
+        }
 
         #endregion
     }

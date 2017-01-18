@@ -1,0 +1,111 @@
+﻿@model Mvc5Project.Models.CommentViewModel
+@using Mvc5Project.Controllers
+@using Microsoft.AspNet.Identity
+@{
+    BlogController blgCtrl = new BlogController();
+    var parentReplies = Model.Comment.Replies;
+    if (parentReplies != null)
+    {
+        foreach (var pReply in parentReplies)
+        {
+            if (pReply.ParentReplyId == null)
+            {
+                var prDetails = blgCtrl.ReplyDetails(pReply.Id);
+                var likes = blgCtrl.LikeDislikeCount("replylike", pReply.Id);
+                var dislikes = blgCtrl.LikeDislikeCount("replydislike", pReply.Id);
+                var twshareUrl = "https://twitter.com/intent/tweet?text=" + pReply.Body + "  -- " + pReply.UserName + "&url=" + Url.Encode(HttpContext.Current.Request.Url.AbsoluteUri);
+
+                <div class="parentReply" id="@prDetails[4]">
+                    <div class="mainreply" id="@prDetails[5]">
+                        <table class="commentControl" id="@prDetails[15]">
+                            <tr>
+                                <td><a class="commentExpCtrl" id="@prDetails[8]" style="font-size:10px;">&mdash;</a></td>
+                                <td>|</td>
+                                <td><a class="commentFlagCtrl" id="@prDetails[9]"><img src="@Url.Content("~/Content/images/post/report.png")" width="10" height="10" alt="report" /></a></td>
+                            </tr>
+                        </table>
+                        <div class="userImage"><img src="@prDetails[1]" height="50" width="50" /></div>
+                        <div class="commentUserName"><strong>@prDetails[0]</strong>&nbsp;&nbsp;<span class="cmntTime">-- @prDetails[2]</span></div>
+                        <div class="commentDate">@prDetails[3]</div>
+
+                        <div class="commentExp" id="@prDetails[7]">
+                            <div class="commentBody">@Html.Raw(pReply.Body)</div>
+
+                            @if (!blgCtrl.ReplyDeleteCheck(pReply.Id))
+                            {
+                                <div class="replySubMenu">
+                                    <a class="likecount" style="color:green;">@likes</a>
+                                    <a href="@Url.Action("UpdateReplyLike", "Blog", new { replyid = pReply.Id,username = User.Identity.GetUserName(), likeordislike = "like",sortorder = ViewBag.CurrentSort })"><img src="@Url.Content("~/Content/images/post/like.png")" alt="like" /></a>
+                                    <a href="@Url.Action("UpdateReplyLike", "Blog", new { replyid = pReply.Id,username = User.Identity.GetUserName(), likeordislike = "dislike",sortorder = ViewBag.CurrentSort })"><img src="@Url.Content("~/Content/images/post/dislike.png")" alt="dislike" /></a>
+                                    <a class="likecount" style="color:red;">@dislikes</a>
+                                    <a style="cursor:pointer;" class="comReplyParent" id="@prDetails[14]">Reply</a>
+                                    <div class="shareParent" id="@prDetails[10]">
+                                        <a style="cursor:pointer;">Share&#x27a3;</a>
+                                        <div>
+                                            <a class="shareChild" id="@prDetails[11]" href="@twshareUrl" target="_blank" title="Tweet"><img src="@Url.Content("~/Content/images/post/twitter.png")" width="25" height="25" alt="twshare" /></a>
+                                        </div>
+                                    </div>
+                                    @if (pReply.UserName == User.Identity.GetUserName())
+                                    {
+                                        <table class="commentMenu" id="@prDetails[16]">
+                                            <tr>
+                                                <td><a href="@Url.Action("EditReply", "Blog", new { replyid = pReply.Id })" title="Edit"><img src="@Url.Content("~/Content/images/post/edit.png")" alt="edit" /></a></td>
+                                                <td><a href="@Url.Action("DeleteReply", "Blog", new { replyid = pReply.Id })" title="Delete"><img src="@Url.Content("~/Content/images/post/delete.png")" alt="delete" /></a></td>
+                                            </tr>
+                                        </table>
+                                    }
+                                </div>
+
+                                if (Request.IsAuthenticated)
+                                {
+                                    var imgUrl = Url.Content("~/Content/images/profile/" + User.Identity.GetUserName() + ".png") + "?time=" + DateTime.Now.ToString();
+                                    <table class="newComment collapseComment">
+                                        <tr>
+                                            <td style="width:50px;vertical-align: top;"><div class="comImg"><img src="@imgUrl" height="50" width="50" /></div></td>
+
+                                            <td style="vertical-align:middle; min-height:40px;" class="comText" id="@prDetails[12]">
+                                                @using (Html.BeginForm("NewChildReply", "Blog", FormMethod.Post, new { @class = "comTextdivParent", role = "form" }))
+                                                {
+                                                    @Html.AntiForgeryToken()
+                                                    <textarea name="replyBody" id="@prDetails[13]"></textarea>
+                                                    <script>
+                                                        CKEDITOR.replace('@prDetails[13]',
+                                                            {
+                                                                customConfig: '/Scripts/ckEditorConfig1.js'
+                                                            });
+                                                    </script>
+                                                    <div class="comTextSub">
+                                                        <input type="hidden" value="@pReply.Id" name="preplyid" id="preplyid" />
+                                                        <input type="hidden" value="@User.Identity.GetUserName()" name="comUserName" id="comUserName" />
+                                                        <input class="comTextBtn" type="submit" value="&#x27a5;" />
+                                                    </div>
+                                                }
+                                                @using (Html.BeginForm("NewChildReply", "Blog", FormMethod.Post, new { @class = "comTextareaParent", role = "form" }))
+                                                {
+                                                    @Html.AntiForgeryToken()
+                                                    <textarea name="replyBody" class="comTextarea" maxlength="5000" placeholder="Join the discussion..."></textarea>
+                                                    <input type="hidden" value="@pReply.Id" name="preplyid" id="preplyid" />
+                                                    <input type="hidden" value="@User.Identity.GetUserName()" name="comUserName" id="comUserName" />
+                                                    <div class="comTextSub">
+                                                        <input class="comTextBtn" type="submit" value="&#x27a5;" />
+                                                    </div>
+                                                }
+                                            </td>
+                                        </tr>
+                                    </table>
+                                }
+                            }
+
+                        </div>
+                    </div>
+                    <div class="commentreplies" id="@prDetails[6]">
+                        @{
+                            Model.ChildReplies = blgCtrl.GetChildReplies(pReply);
+                            Html.RenderPartial("ChildReplies", Model.ChildReplies);
+                        }
+                    </div>
+                </div>
+                                    }
+                                }
+                            }
+}

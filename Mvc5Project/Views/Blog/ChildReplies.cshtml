@@ -1,0 +1,107 @@
+﻿@model IList<Mvc5Project.Models.CommentViewModel>
+@using Mvc5Project.Controllers
+@using Microsoft.AspNet.Identity
+
+@foreach (var childReply in Model)
+{
+    if (childReply != null)
+    {
+        BlogController blgCtrl = new BlogController();
+        var crDetails = blgCtrl.ReplyDetails(childReply.Id);
+        var likes = blgCtrl.LikeDislikeCount("replylike", childReply.Id);
+        var dislikes = blgCtrl.LikeDislikeCount("replydislike", childReply.Id);
+        var twshareUrl = "https://twitter.com/intent/tweet?text=" + childReply.Body + "  -- " + childReply.UserName + "&url=" + Url.Encode(HttpContext.Current.Request.Url.AbsoluteUri);
+
+        <div class="childReply" id="@crDetails[4]">
+            <div class="childReplyCont" id="@crDetails[5]">
+                <table class="commentControl" id="@crDetails[15]">
+                    <tr>
+                        <td><a class="commentExpCtrl" id="@crDetails[8]" style="font-size:10px;">&mdash;</a></td>
+                        <td>|</td>
+                        <td><a class="commentFlagCtrl" id="@crDetails[9]"><img src="@Url.Content("~/Content/images/post/report.png")" width="10" height="10" alt="report" /></a></td>
+                    </tr>
+                </table>
+                <div class="userImage"><img src="@crDetails[1]" height="50" width="50" /></div>
+                <div class="commentUserName"><strong>@crDetails[0]</strong>&nbsp;&nbsp;<span class="cmntTime">-- @crDetails[2]</span></div>
+                <div class="commentDate">@crDetails[3]</div>
+
+                <div class="commentExp" id="@crDetails[7]">
+                    <div class="commentBody">@Html.Raw(childReply.Body)</div>
+                    @if (!blgCtrl.ReplyDeleteCheck(childReply.Id))
+                    {
+                        <div class="replySubMenu">
+                            <a class="likecount" style="color:green;">@likes</a>
+                            <a href="@Url.Action("UpdateReplyLike", "Blog", new { replyid = childReply.Id,  username = User.Identity.GetUserName(), likeordislike = "like",sortorder = ViewBag.CurrentSort })"><img src="@Url.Content("~/Content/images/post/like.png")" alt="like" /></a>
+                            <a href="@Url.Action("UpdateReplyLike", "Blog", new { replyid = childReply.Id,  username = User.Identity.GetUserName(), likeordislike = "dislike",sortorder = ViewBag.CurrentSort })"><img src="@Url.Content("~/Content/images/post/dislike.png")" alt="dislike" /></a>
+                            <a class="likecount" style="color:red;">@dislikes</a>
+                            <a style="cursor:pointer;" class="comReplyParent" id="@crDetails[14]">Reply</a>
+                            <div class="shareParent" id="@crDetails[10]">
+                                <a style="cursor:pointer;">Share&#x27a3;</a>
+                                <div>
+                                    <a class="shareChild" id="@crDetails[11]" href="@twshareUrl" target="_blank" title="Tweet"><img src="@Url.Content("~/Content/images/post/twitter.png")" width="25" height="25" alt="twshare" /></a>
+                                </div>
+                            </div>
+                            @if (childReply.UserName == User.Identity.GetUserName())
+                            {
+                                <table class="commentMenu" id="@crDetails[16]">
+                                    <tr>
+                                        <td><a href="@Url.Action("EditReply", "Blog", new { replyid = childReply.Id })" title="Edit"><img src="@Url.Content("~/Content/images/post/edit.png")" alt="edit" /></a></td>
+                                        <td><a href="@Url.Action("DeleteReply", "Blog", new { replyid = childReply.Id })" title="Delete"><img src="@Url.Content("~/Content/images/post/delete.png")" alt="delete" /></a></td>
+                                    </tr>
+                                </table>
+                            }
+                        </div>
+                        if (Request.IsAuthenticated)
+                        {
+                            var imgUrl = Url.Content("~/Content/images/profile/" + User.Identity.GetUserName() + ".png") + "?time=" + DateTime.Now.ToString();
+                            <table class="newComment collapseComment">
+                                <tr>
+                                    <td style="width:50px;vertical-align: top;"><div class="comImg"><img src="@imgUrl" height="50" width="50" /></div></td>
+
+                                    <td style="vertical-align:middle; min-height:40px;" class="comText" id="@crDetails[12]">
+                                        @using (Html.BeginForm("NewChildReply", "Blog", FormMethod.Post, new { @class = "comTextdivParent", role = "form" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <textarea name="replyBody" id="@crDetails[13]"></textarea>
+                                            <script>
+                                            CKEDITOR.replace('@crDetails[13]',
+                                                {
+                                                    customConfig: '/Scripts/ckEditorConfig1.js'
+                                                });
+                                            </script>
+                                            <div class="comTextSub">
+                                                <input type="hidden" value="@childReply.Id" name="preplyid" id="preplyid" />
+                                                <input type="hidden" value="@User.Identity.GetUserName()" name="comUserName" id="comUserName" />
+                                                <input class="comTextBtn" type="submit" value="&#x27a5;" />
+                                            </div>
+                                        }
+                                        @using (Html.BeginForm("NewChildReply", "Blog", FormMethod.Post, new { @class = "comTextareaParent", role = "form" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <textarea name="replyBody" class="comTextarea" maxlength="5000" placeholder="Join the discussion..."></textarea>
+                                            <input type="hidden" value="@childReply.Id" name="preplyid" id="preplyid" />
+                                            <input type="hidden" value="@User.Identity.GetUserName()" name="comUserName" id="comUserName" />
+                                            <div class="comTextSub">
+                                                <input class="comTextBtn" type="submit" value="&#x27a5;" />
+                                            </div>
+                                        }
+                                    </td>
+                                </tr>
+                            </table>
+                        }
+                    }
+
+                </div>
+            </div>
+            <div class="commentreplies" id="@crDetails[6]">
+                @if (childReply.ChildReplies != null)
+                {
+                    if (childReply.ChildReplies.Count > 0)
+                    { Html.RenderPartial("ChildReplies", childReply.ChildReplies); }
+                }
+            </div>
+        </div>
+    }
+}
+
+

@@ -12,6 +12,7 @@
 }
 @section Scripts
 {
+<script src="~/Scripts/view.js"></script>
     <script src="~/ckeditor/ckeditor.js"></script>
 }
 
@@ -64,4 +65,5 @@
         }
         <div class="postBody">@Html.Raw(Model.Body)</div>
     </div>
+    @{Html.RenderPartial("Comments");}
 </div>

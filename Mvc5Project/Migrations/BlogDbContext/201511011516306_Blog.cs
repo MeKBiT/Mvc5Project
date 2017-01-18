@@ -14,7 +14,7 @@ namespace Mvc5Project.Migrations.BlogDbContext
                         Id = c.String(nullable: false, maxLength: 128),
                         Name = c.String(nullable: false),
                         UrlSeo = c.String(nullable: false),
-                        Description = c.String(nullable: false, maxLength: 20),
+                        Description = c.String(nullable: false),
                         Checked = c.Boolean(nullable: false),
                     })
                 .PrimaryKey(t => t.Id);
@@ -38,10 +38,10 @@ namespace Mvc5Project.Migrations.BlogDbContext
                 c => new
                     {
                         Id = c.String(nullable: false, maxLength: 128),
-                        Title = c.String(nullable: false, maxLength: 50),
-                        ShortDescription = c.String(nullable: false, maxLength: 250),
+                        Title = c.String(nullable: false),
+                        ShortDescription = c.String(nullable: false),
                         Body = c.String(nullable: false),
-                        Meta = c.String(nullable: false, maxLength: 25),
+                        Meta = c.String(nullable: false),
                         UrlSeo = c.String(nullable: false),
                         Published = c.Boolean(nullable: false),
                         NetLikeCount = c.Int(nullable: false),
@@ -58,7 +58,7 @@ namespace Mvc5Project.Migrations.BlogDbContext
                         PostId = c.String(maxLength: 128),
                         DateTime = c.DateTime(nullable: false),
                         UserName = c.String(),
-                        Body = c.String(nullable: false, maxLength: 1000),
+                        Body = c.String(nullable: false),
                         NetLikeCount = c.Int(nullable: false),
                         Deleted = c.Boolean(nullable: false),
                     })
@@ -90,7 +90,7 @@ namespace Mvc5Project.Migrations.BlogDbContext
                         ParentReplyId = c.String(),
                         DateTime = c.DateTime(nullable: false),
                         UserName = c.String(),
-                        Body = c.String(nullable: false, maxLength: 1000),
+                        Body = c.String(nullable: false),
                         Deleted = c.Boolean(nullable: false),
                     })
                 .PrimaryKey(t => t.Id)
@@ -147,7 +147,7 @@ namespace Mvc5Project.Migrations.BlogDbContext
                     {
                         Id = c.String(nullable: false, maxLength: 128),
                         Name = c.String(nullable: false),
-                        UrlSeo = c.String(nullable: false, maxLength: 20),
+                        UrlSeo = c.String(nullable: false),
                         Checked = c.Boolean(nullable: false),
                     })
                 .PrimaryKey(t => t.Id);
