@@ -45,7 +45,7 @@ namespace Mvc5Project.DAL
         Reply GetReplyById(string id);
         bool CommentDeleteCheck(string commentid);
         bool ReplyDeleteCheck(string replyid);
-
+        string GetPageIdByComment(string commentId);
         void UpdateCommentLike(string commentid, string username, string likeordislike);
         void UpdateReplyLike(string replyid, string username, string likeordislike);
         Post GetPostByReply(string replyid);

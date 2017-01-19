@@ -436,7 +436,10 @@ namespace Mvc5Project.DAL
             return _context.Posts.Where(x => x.Id == postId).FirstOrDefault();
         }
 
-
+        public string GetPageIdByComment(string commentId)
+        {
+            return _context.Comments.Where(x => x.Id == commentId).Select(x => x.PageId).FirstOrDefault();
+        }
 
 
         public IList<Comment> GetComments()

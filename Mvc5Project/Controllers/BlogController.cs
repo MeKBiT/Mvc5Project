@@ -32,7 +32,6 @@ namespace Mvc5Project.Controllers
         {
             _blogRepository = new BlogRepository(new BlogDbContext());
         }
-
         public BlogController(IBlogRepository blogRepository, ApplicationUserManager userManager, ApplicationSignInManager signInManager)
         {
             _blogRepository = blogRepository;
@@ -51,8 +50,6 @@ namespace Mvc5Project.Controllers
                 _signInManager = value;
             }
         }
-
-
         public ApplicationUserManager UserManager
         {
             get
@@ -725,7 +722,6 @@ namespace Mvc5Project.Controllers
         {
             return PartialView();
         }
-
         public CommentViewModel CreateCommentViewModel(string pageId, string sortOrder)
         {
             CommentViewModel model = new CommentViewModel();
@@ -781,7 +777,6 @@ namespace Mvc5Project.Controllers
         {
             return PartialView();
         }
-
         public PartialViewResult ChildReplies()
         {
             return PartialView();
@@ -842,13 +837,21 @@ namespace Mvc5Project.Controllers
                 NetLikeCount = 0
             };
             _blogRepository.AddNewComment(comment);
-            return RedirectToAction("Post", new { slug = slug });
+
+            if (pageId.Contains("post"))
+            {
+                return RedirectToAction("Post", new { slug = slug });
+            }
+            else
+            {
+                return RedirectToAction("Index", "Blog");
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ValidateInput(false)]
-        public ActionResult NewParentReply(string replyBody, string comUserName, string postid, string commentid, string slug)
+        public ActionResult NewParentReply(string replyBody, string comUserName, string commentid, string slug)
         {
             var comDelChck = CommentDeleteCheck(commentid);
             if (!comDelChck)
@@ -884,7 +887,16 @@ namespace Mvc5Project.Controllers
                 };
                 _blogRepository.AddNewReply(reply);
             }
-            return RedirectToAction("Post", new { slug = slug });
+
+            var pageId = _blogRepository.GetPageIdByComment(commentid);
+            if (pageId.Contains("post"))
+            {
+                return RedirectToAction("Post", new { slug = slug });
+            }
+            else
+            {
+                return RedirectToAction("Index", "Blog");
+            }
         }
 
 
@@ -928,7 +940,15 @@ namespace Mvc5Project.Controllers
                 };
                 _blogRepository.AddNewReply(reply);
             }
-            return RedirectToAction("Post", new { slug = _blogRepository.GetUrlSeoByReply(preply) });
+            var pageId = _blogRepository.GetPageIdByComment(preply.CommentId);
+            if (pageId.Contains("post"))
+            {
+                return RedirectToAction("Post", new { slug = _blogRepository.GetUrlSeoByReply(preply) });
+            }
+            else
+            {
+                return RedirectToAction("Index", "Blog");
+            }
         }
 
 
